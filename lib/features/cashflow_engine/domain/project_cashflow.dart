@@ -7,6 +7,7 @@ import '../../transactions/domain/entities/recurrence_rule.dart';
 import '../../transactions/domain/entities/transaction.dart';
 import 'entities/account_snapshot.dart';
 import 'entities/daily_balance.dart';
+import 'recurrence_expansion.dart';
 
 /// Função pura, determinística, sem I/O (docs/CASHFLOW_ENGINE.md §1).
 /// Não lê relógio: `horizonStart`/`horizonEnd` são os únicos parâmetros de
@@ -30,7 +31,7 @@ List<DailyBalance> projectCashflow({
   // 1. Expandir recorrências em ocorrências virtuais dentro do horizonte.
   final virtualEvents = <_Event>[];
   for (final rule in recurrenceRules) {
-    for (final date in _expandRecurrence(rule, horizonStart, horizonEnd)) {
+    for (final date in expandRecurrence(rule, horizonStart, horizonEnd)) {
       virtualEvents.add(_Event(
         accountId: rule.accountId,
         amountCents: rule.amountCents,
@@ -179,55 +180,4 @@ class _Event {
   final int amountCents;
   final DateOnly date;
   final String? recurrenceRuleId;
-}
-
-List<DateOnly> _expandRecurrence(
-  RecurrenceRule rule,
-  DateOnly from,
-  DateOnly to,
-) {
-  final dates = <DateOnly>[];
-  var cursor = rule.startDate;
-  var n = 0;
-  final effectiveEnd = rule.endDate ?? to;
-
-  while (!cursor.isAfter(to) &&
-      !cursor.isAfter(effectiveEnd) &&
-      (rule.occurrenceCount == null || n < rule.occurrenceCount!)) {
-    if (!cursor.isBefore(from)) dates.add(cursor);
-    n += 1;
-    cursor = _nextOccurrence(rule, n);
-  }
-  return dates;
-}
-
-DateOnly _nextOccurrence(RecurrenceRule rule, int n) {
-  final base = rule.startDate;
-  switch (rule.frequency) {
-    case RecurrenceFrequency.weekly:
-      return base.addDays(n * 7);
-    case RecurrenceFrequency.monthly:
-      final monthsFromBase = base.month - 1 + n * rule.interval;
-      return _clampedMonthDate(
-        base.year + monthsFromBase ~/ 12,
-        monthsFromBase % 12 + 1,
-        base.day,
-      );
-    case RecurrenceFrequency.yearly:
-      return _clampedMonthDate(
-        base.year + n * rule.interval,
-        base.month,
-        base.day,
-      );
-    case RecurrenceFrequency.custom:
-      return base.addDays(n * rule.interval);
-  }
-}
-
-/// Gera a data pedida; se o dia não existir naquele mês (ex.: dia 31 em
-/// fevereiro), usa o último dia real do mês (docs/CASHFLOW_ENGINE.md §3 —
-/// regra de dia inválido).
-DateOnly _clampedMonthDate(int year, int month, int day) {
-  final lastDayOfMonth = DateTime(year, month + 1, 0).day;
-  return DateOnly(year, month, day > lastDayOfMonth ? lastDayOfMonth : day);
 }

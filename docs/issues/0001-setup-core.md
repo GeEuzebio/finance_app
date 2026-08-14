@@ -1,5 +1,10 @@
 # Issue #001 — Setup do core + DI + camada base
 
+> ⚠️ Especificação original (Drift/`AppDatabase`), mantida como registro
+> histórico. Depois do ADR 0005, `AppDatabase`/DAOs foram removidos; o DI
+> registra um `SupabaseClient` (`Supabase.instance.client`) em vez disso —
+> ver `lib/core/di/injection.dart` e `lib/main.dart` para o estado atual.
+
 ## Objetivo
 Deixar o projeto Flutter compilando com a espinha dorsal de infraestrutura
 funcionando — DI resolvendo, conexão com o banco abrindo e fechando — sem

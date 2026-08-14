@@ -1,7 +1,6 @@
 name: finance_app
 description: >
-  App de finanças pessoais focado em previsibilidade de saldo futuro,
-  100% offline-first.
+  App de finanças pessoais focado em previsibilidade de saldo futuro.
 publish_to: "none"
 version: 0.1.0
 
@@ -14,19 +13,14 @@ dependencies:
     sdk: flutter
 
   # Estado: único mecanismo de estado do app (ADR 0001) — providers reativos
-  # para streams do Drift e para o resultado da engine de projeção.
+  # para streams do Supabase e para o resultado da engine de projeção.
   flutter_riverpod: ^2.5.1
+  riverpod: ^2.6.1
   riverpod_annotation: ^2.3.5
 
-  # Persistência local (ADR 0002) — SQLite type-safe com migrations
-  # versionadas, sem backend.
-  drift: ^2.18.0
-  # Binário nativo do SQLite para Android/iOS, exigido pelo drift.
-  sqlite3_flutter_libs: ^0.5.24
-  # Resolve o diretório de armazenamento do banco no dispositivo.
-  path_provider: ^2.1.3
-  # Manipulação de caminho de arquivo, usada para montar o path do banco.
-  path: ^1.9.0
+  # Persistência (ADR 0005) — Postgres gerenciado, compartilhado entre os
+  # dois usuários do app sem precisar de sync manual entre dispositivos.
+  supabase_flutter: ^2.17.1
 
   # DI (ADR 0003) — service locator resolvido uma vez em main.dart.
   get_it: ^7.7.0
@@ -44,16 +38,22 @@ dependencies:
   # Formatação de moeda (centavos -> "R$ 1.234,56") e datas em pt-BR na UI.
   intl: ^0.19.0
 
+  # Gera ids client-side para as entidades (uuid v4), sem depender do
+  # Postgres para atribuir a chave primária antes do insert.
+  uuid: ^4.6.0
+
+  # Tipografia consistente entre Android e iOS (Inter) — a identidade
+  # visual é única nos dois SOs (ver PRODUCT.md), não a fonte de sistema
+  # de cada plataforma (docs/DESIGN.md).
+  google_fonts: ^8.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # Codegen compartilhado por drift_dev, riverpod_generator, injectable e
-  # freezed — um único runner (`dart run build_runner build`).
+  # Codegen compartilhado por riverpod_generator, injectable e freezed —
+  # um único runner (`dart run build_runner build`).
   build_runner: ^2.4.11
-
-  # Geração das tabelas/queries type-safe a partir das classes Table.
-  drift_dev: ^2.18.0
 
   # Geração dos providers @riverpod.
   riverpod_generator: ^2.4.0
@@ -70,5 +70,13 @@ dev_dependencies:
   flutter_lints: ^4.0.0
 
   # Mocks/fakes para testar repositórios e casos de uso isolados da
-  # camada data, sem subir um banco real.
+  # camada data, sem depender de uma conexão real com o Supabase.
   mocktail: ^1.0.4
+
+  # SharedPreferences.setMockInitialValues — Supabase.initialize() guarda
+  # sessão local via shared_preferences; em teste de VM isso precisa de
+  # mock explícito (sem platform channel real).
+  shared_preferences: ^2.5.5
+
+flutter:
+  uses-material-design: true

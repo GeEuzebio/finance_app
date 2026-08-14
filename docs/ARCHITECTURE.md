@@ -14,11 +14,15 @@ calculada por uma engine de projeção diária pura (ver
 projeção diária, check-in diário, gestão de cartões e reservas/objetivos.
 
 Uso do app: pessoal, compartilhado entre duas pessoas (o usuário e o
-cônjuge) em um único banco de dados local no aparelho — sem login, sem
-seleção de perfil. Contas têm um dono (`owner`) só para fins de exibição e
-filtro; a projeção é sempre uma única visão consolidada da casa.
+cônjuge) em um único banco de dados compartilhado — sem login, sem seleção
+de perfil. Contas têm um dono (`owner`) só para fins de exibição e filtro;
+a projeção é sempre uma única visão consolidada da casa.
 
-100% offline-first, sem backend na v1.
+⚠️ Persistência via Supabase/Postgres (ADR 0005, supersede ADR 0002 —
+local Drift/SQLite). Isso resolve o requisito de ver os mesmos dados nos
+dois aparelhos sem sync manual, mas troca o pilar original "100%
+offline-first, sem backend" por um app que exige conexão — não há mais
+modo offline nem fallback local nesta versão.
 
 ## 2. Camadas e regra de importação
 
@@ -26,14 +30,15 @@ filtro; a projeção é sempre uma única visão consolidada da casa.
 presentation  →  domain  ←  data
 ```
 
-- **domain**: entidades puras (Dart puro, sem Flutter, sem Drift), regras de
-  negócio, casos de uso (classes `UseCase`), contratos de repositório
+- **domain**: entidades puras (Dart puro, sem Flutter, sem Supabase), regras
+  de negócio, casos de uso (classes `UseCase`), contratos de repositório
   (interfaces abstratas) e a engine de projeção. Não importa `data` nem
-  `presentation`. Não importa `drift`, `flutter` ou `riverpod`.
-- **data**: implementações concretas dos contratos de `domain` (repositórios),
-  DAOs Drift, mapeamento entidade ↔ tabela, tratamento de exceções → `Failure`.
-  Importa `domain` (para implementar os contratos) e pacotes de
-  infraestrutura (`drift`, `sqlite3`). Nunca importa `presentation`.
+  `presentation`. Não importa `supabase_flutter`, `flutter` ou `riverpod`.
+- **data**: implementações concretas dos contratos de `domain`
+  (repositórios), mapeamento JSON (`Map<String, dynamic>` do Postgrest) ↔
+  entidade, tratamento de exceções → `Failure`. Importa `domain` (para
+  implementar os contratos) e `supabase_flutter`. Nunca importa
+  `presentation`.
 - **presentation**: widgets, providers Riverpod, controllers/notifiers.
   Importa `domain` (casos de uso, entidades) via DI. Nunca importa `data`
   diretamente — sempre through the domain layer contracts resolvidos pelo
@@ -59,18 +64,7 @@ lib/
       injection.config.dart          # gerado (injectable_generator)
     errors/
       failure.dart                   # hierarquia de Failure (seção 6)
-    database/
-      app_database.dart              # @DriftDatabase, tabelas + migrations
-      app_database.g.dart            # gerado (drift_dev)
-      connection.dart                # abertura da conexão nativa sqlite3
-      tables/
-        accounts_table.dart
-        transactions_table.dart
-        recurrence_rules_table.dart
-        credit_cards_table.dart
-        invoices_table.dart
-        invoice_items_table.dart
-        reserves_table.dart
+      guard_database.dart            # try/catch -> Either<Failure, T> compartilhado
     utils/
       money.dart                     # helpers de int-centavos (soma, formatação)
       date_only.dart                 # tipo/helpers de data sem hora (America/Sao_Paulo)
@@ -81,9 +75,7 @@ lib/
         repositories/account_repository.dart      # interface
         usecases/...
       data/
-        models/account_dto.dart                    # mapeamento Drift row ↔ entidade
-        repositories/account_repository_impl.dart
-        datasources/account_local_datasource.dart   # usa AccountsDao
+        repositories/account_repository_impl.dart   # também expõe accountFromJson/accountToJson
       presentation/                                 # fora de escopo nesta sessão
     transactions/
       domain/
@@ -230,7 +222,7 @@ simples de implementar e mais flexível para o usuário (ex.: "reserva de
 emergência" não precisa estar fisicamente separada em uma conta poupança).
 
 ### DailyBalance
-**Não é uma tabela Drift.** É o tipo de retorno em memória da função pura de
+**Não é uma tabela persistida.** É o tipo de retorno em memória da função pura de
 projeção (`project_cashflow.dart`), recalculado sob demanda a cada chamada
 (orçamento de performance: <50ms para 12 meses / 500 lançamentos — ver
 CASHFLOW_ENGINE.md). Nunca persistido, para não ter que invalidar cache toda
@@ -246,131 +238,42 @@ vez que um lançamento muda.
 | projectedDebitsCents | `int` | soma de débitos do dia |
 | freeBalanceCents | `int` | `closingBalanceCents` − Σ reservas ativas (só faz sentido no consolidado, já que `Reserve` não é por conta) |
 
-## 5. Schema Drift
+## 5. Schema Postgres (Supabase)
 
-Uma tabela Drift por entidade persistida (todas exceto `DailyBalance`).
-Convenções: chave primária `TextColumn id` (uuid gerado em Dart, não
-autoincrement — evita colisão entre inserts client-side antes do sync futuro,
-caso venha a existir); enums mapeados via `TextColumn().map(EnumIndexConverter)`
-ou `intEnum` do drift; dinheiro sempre `IntColumn` (centavos); datas de
-lançamento `DateTimeColumn` truncadas para meia-noite America/Sao_Paulo no
-momento da escrita (o tipo `DateOnly` do domínio cuida da truncagem antes de
-chegar no DAO).
+Uma tabela por entidade persistida (todas exceto `DailyBalance`), definida
+em SQL puro em [`supabase/schema.sql`](../supabase/schema.sql) — não há
+mais schema Dart gerado (ver ADR 0005, que substitui o ADR 0002/Drift).
+Convenções: chave primária `uuid default gen_random_uuid()`; enums como
+tipos nativos do Postgres (`create type ... as enum (...)`), com os mesmos
+valores dos enums Dart (`AccountType.checking.name == 'checking'`, sem
+tabela de tradução); dinheiro sempre `bigint` (centavos); datas de
+lançamento `date` (sem hora — mapeia direto para `DateOnly` no Dart, sem
+truncagem manual); `created_at`/`updated_at` como `timestamptz`.
 
-```dart
-class Accounts extends Table {
-  TextColumn get id => text()();
-  TextColumn get name => text()();
-  IntColumn get type => intEnum<AccountType>()();
-  IntColumn get owner => intEnum<AccountOwner>()();
-  IntColumn get initialBalanceCents => integer()();
-  DateTimeColumn get initialBalanceDate => dateTime()();
-  BoolColumn get archived => boolean().withDefault(const Constant(false))();
-  DateTimeColumn get createdAt => dateTime()();
-  @override
-  Set<Column> get primaryKey => {id};
-}
+Colunas em `snake_case` (convenção Postgres) ↔ campos `camelCase` na
+entidade Dart — o mapeamento fica nas próprias implementações de
+repositório (`accountFromJson`/`accountToJson` etc., funções puras
+testáveis sem rede, uma por entidade).
 
-class Transactions extends Table {
-  TextColumn get id => text()();
-  TextColumn get accountId => text().references(Accounts, #id)();
-  TextColumn get description => text()();
-  IntColumn get amountCents => integer()();
-  DateTimeColumn get date => dateTime()();
-  IntColumn get status => intEnum<TransactionStatus>()();
-  TextColumn get recurrenceRuleId =>
-      text().nullable().references(RecurrenceRules, #id)();
-  TextColumn get originalTransactionId => text().nullable()();
-  TextColumn get transferGroupId => text().nullable()();
-  TextColumn get invoicePaymentForId =>
-      text().nullable().references(Invoices, #id)();
-  DateTimeColumn get createdAt => dateTime()();
-  DateTimeColumn get updatedAt => dateTime()();
-  @override
-  Set<Column> get primaryKey => {id};
-}
+`Invoice.totalCents` continua **não** sendo uma coluna: cada
+`CreditCardRepositoryImpl.totalCentsForInvoice` soma `amount_cents` dos
+itens da fatura no cliente (ponytail: volume por fatura é pequeno; migrar
+para uma view/RPC agregada no Postgres só se isso crescer).
 
-class RecurrenceRules extends Table {
-  TextColumn get id => text()();
-  TextColumn get accountId => text().references(Accounts, #id)();
-  TextColumn get description => text()();
-  IntColumn get amountCents => integer()();
-  IntColumn get frequency => intEnum<RecurrenceFrequency>()();
-  IntColumn get interval => integer()();
-  DateTimeColumn get startDate => dateTime()();
-  DateTimeColumn get endDate => dateTime().nullable()();
-  IntColumn get occurrenceCount => integer().nullable()();
-  DateTimeColumn get createdAt => dateTime()();
-  @override
-  Set<Column> get primaryKey => {id};
-}
-
-class CreditCards extends Table {
-  TextColumn get id => text()();
-  TextColumn get name => text()();
-  TextColumn get paymentAccountId => text().references(Accounts, #id)();
-  IntColumn get closingDay => integer()();
-  IntColumn get dueDay => integer()();
-  IntColumn get limitCents => integer().nullable()();
-  IntColumn get owner => intEnum<AccountOwner>()();
-  DateTimeColumn get createdAt => dateTime()();
-  @override
-  Set<Column> get primaryKey => {id};
-}
-
-class Invoices extends Table {
-  TextColumn get id => text()();
-  TextColumn get creditCardId => text().references(CreditCards, #id)();
-  TextColumn get referenceMonth => text()();
-  DateTimeColumn get closingDate => dateTime()();
-  DateTimeColumn get dueDate => dateTime()();
-  IntColumn get status => intEnum<InvoiceStatus>()();
-  DateTimeColumn get createdAt => dateTime()();
-  @override
-  Set<Column> get primaryKey => {id};
-  // totalCents não é coluna: é agregado via query (SUM) sobre InvoiceItems.
-}
-
-class InvoiceItems extends Table {
-  TextColumn get id => text()();
-  TextColumn get invoiceId => text().references(Invoices, #id)();
-  TextColumn get description => text()();
-  IntColumn get amountCents => integer()();
-  DateTimeColumn get purchaseDate => dateTime()();
-  IntColumn get installmentNumber => integer()();
-  IntColumn get installmentTotal => integer()();
-  TextColumn get purchaseGroupId => text()();
-  DateTimeColumn get createdAt => dateTime()();
-  @override
-  Set<Column> get primaryKey => {id};
-}
-
-class Reserves extends Table {
-  TextColumn get id => text()();
-  TextColumn get name => text()();
-  IntColumn get targetAmountCents => integer().nullable()();
-  IntColumn get currentAmountCents => integer()();
-  DateTimeColumn get createdAt => dateTime()();
-  @override
-  Set<Column> get primaryKey => {id};
-}
-```
-
-`Invoice.totalCents` é deliberadamente **não** uma coluna: é sempre derivado
-via `SUM(amountCents)` sobre `InvoiceItems` da fatura, para nunca dessincronizar
-do detalhe (estorno, nova compra) — ponytail: uma coluna cacheada exigiria
-um trigger ou recomputo manual em todo write; a query agregada é mais barata
-de manter certa do que de manter sincronizada.
+Segurança: sem autenticação nesta versão, RLS fica **ligado** em todas as
+tabelas com uma política permissiva (`using (true)`) por tabela — acesso da
+`SUPABASE_ANON_KEY` é total na prática, mas RLS ligado é o padrão
+recomendado pelo Supabase e deixa pronto o caminho para apertar a política
+por usuário se o app ganhar login (documentado com `⚠️` no topo do
+`schema.sql`). A `SUPABASE_SERVICE_ROLE_KEY` nunca é referenciada em `lib/`.
 
 ### Estratégia de migrations
 
-`schemaVersion` incremental (`int`, começa em 1). Cada versão nova =
-`schemaVersion++` + um step em `MigrationStrategy.onUpgrade` usando
-`stepByStep` do drift (`m.addColumn`, `m.createTable`, etc., um `case` por
-transição de versão `from → to`). Nunca editar uma migration já publicada —
-sempre uma nova. Testado via `verifySelfConsistency` do drift em CI
-(⚠️ SUPOSIÇÃO: convenção padrão do pacote, não uma decisão específica deste
-produto).
+Um arquivo SQL novo por mudança de schema, nunca editar um já aplicado —
+mesma disciplina que o Drift já seguia, só que aplicada manualmente no SQL
+Editor do Supabase (sem CLI/Docker configurados nesta sessão). ⚠️
+SUPOSIÇÃO: adotar o Supabase CLI (`supabase migration new`) fica para
+quando o time quiser CI/CD de schema — hoje é um passo manual documentado.
 
 ## 6. Catálogo de Failures
 
@@ -406,7 +309,7 @@ class ProjectionFailure extends Failure {
   (ex.: `closingDay` fora de 1–31, `installmentTotal < 1`).
 - `NotFoundFailure`: busca por id que não existe (ex.: editar `Transaction`
   inexistente).
-- `DatabaseFailure`: qualquer exceção do driver sqlite/drift capturada no
+- `DatabaseFailure`: qualquer exceção do cliente Supabase/Postgrest capturada no
   boundary `data` (constraint violation, disco cheio, etc.) — nunca vaza
   `SqliteException` além da camada `data`.
 - `ProjectionFailure`: engine recebeu entrada inconsistente (ex.: regra de

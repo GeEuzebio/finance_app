@@ -19,6 +19,7 @@ abstract class CreditCardRepository {
   Future<Either<Failure, Unit>> upsertInvoice(Invoice invoice);
 
   Future<Either<Failure, List<InvoiceItem>>> getItemsForInvoice(String invoiceId);
+  Future<Either<Failure, List<InvoiceItem>>> getAllItems();
   Future<Either<Failure, Unit>> upsertItem(InvoiceItem item);
 
   /// Soma de `amountCents` de todos os itens da fatura — `Invoice.totalCents`

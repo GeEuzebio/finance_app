@@ -1,5 +1,11 @@
 # ADR 0002 — Persistência local com Drift
 
+> ⚠️ **SUPERSEDIDO pelo [ADR 0005](0005-supabase.md).** O produto migrou de
+> Drift/SQLite local para Supabase/Postgres compartilhado, para permitir que
+> o usuário e o cônjuge vejam os mesmos dados em aparelhos diferentes sem
+> sync manual. Este documento fica como registro histórico da decisão
+> original e do porquê ela mudou — não reflete o código atual.
+
 ## Contexto
 Produto 100% offline-first, sem backend na v1. A persistência precisa
 suportar: schema relacional com foreign keys reais (Transaction → Account,

@@ -43,3 +43,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Environment / secrets — nunca versionar credenciais
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+google-services.json
+GoogleService-Info.plist

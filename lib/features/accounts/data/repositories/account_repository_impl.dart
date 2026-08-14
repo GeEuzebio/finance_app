@@ -1,42 +1,42 @@
-import 'package:drift/drift.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/database/app_database.dart' as db;
-import '../../../../core/database/daos/accounts_dao.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/guard_database.dart';
 import '../../../../core/utils/date_only.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/repositories/account_repository.dart';
 
+const _table = 'accounts';
+
 @LazySingleton(as: AccountRepository)
 class AccountRepositoryImpl implements AccountRepository {
-  AccountRepositoryImpl(this._dao);
+  AccountRepositoryImpl(this._client);
 
-  final AccountsDao _dao;
+  final SupabaseClient _client;
 
   @override
   Future<Either<Failure, List<Account>>> getAll() {
     return guardDatabase(() async {
-      final rows = await _dao.getAll();
-      return rows.map(_toEntity).toList();
+      final rows = await _client.from(_table).select();
+      return rows.map(accountFromJson).toList();
     });
   }
 
   @override
   Future<Either<Failure, Account>> getById(String id) {
     return guardDatabase(() async {
-      final row = await _dao.getById(id);
+      final row = await _client.from(_table).select().eq('id', id).maybeSingle();
       if (row == null) throw NotFoundFailure('Conta $id não encontrada');
-      return _toEntity(row);
+      return accountFromJson(row);
     });
   }
 
   @override
   Future<Either<Failure, Unit>> upsert(Account account) {
     return guardDatabase(() async {
-      await _dao.upsert(_toCompanion(account));
+      await _client.from(_table).upsert(accountToJson(account));
       return unit;
     });
   }
@@ -44,30 +44,35 @@ class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<Either<Failure, Unit>> delete(String id) {
     return guardDatabase(() async {
-      await _dao.deleteById(id);
+      await _client.from(_table).delete().eq('id', id);
       return unit;
     });
   }
-
-  Account _toEntity(db.Account row) => Account(
-        id: row.id,
-        name: row.name,
-        type: row.type,
-        owner: row.owner,
-        initialBalanceCents: row.initialBalanceCents,
-        initialBalanceDate: DateOnly.fromDateTime(row.initialBalanceDate),
-        archived: row.archived,
-        createdAt: row.createdAt,
-      );
-
-  db.AccountsCompanion _toCompanion(Account account) => db.AccountsCompanion.insert(
-        id: account.id,
-        name: account.name,
-        type: account.type,
-        owner: account.owner,
-        initialBalanceCents: account.initialBalanceCents,
-        initialBalanceDate: account.initialBalanceDate.toDateTime(),
-        archived: Value(account.archived),
-        createdAt: account.createdAt,
-      );
 }
+
+/// Mapeamento puro linha↔entidade — testável sem conexão de rede
+/// (ver test/features/accounts/data/repositories/account_mapper_test.dart).
+Account accountFromJson(Map<String, dynamic> row) => Account(
+      id: row['id'] as String,
+      name: row['name'] as String,
+      type: AccountType.values.byName(row['type'] as String),
+      owner: AccountOwner.values.byName(row['owner'] as String),
+      initialBalanceCents: row['initial_balance_cents'] as int,
+      initialBalanceDate:
+          DateOnly.fromDateTime(DateTime.parse(row['initial_balance_date'] as String)),
+      archived: row['archived'] as bool,
+      createdAt: DateTime.parse(row['created_at'] as String),
+    );
+
+Map<String, dynamic> accountToJson(Account account) => {
+      'id': account.id,
+      'name': account.name,
+      'type': account.type.name,
+      'owner': account.owner.name,
+      'initial_balance_cents': account.initialBalanceCents,
+      'initial_balance_date': _dateOnlyJson(account.initialBalanceDate),
+      'archived': account.archived,
+      'created_at': account.createdAt.toIso8601String(),
+    };
+
+String _dateOnlyJson(DateOnly date) => date.toDateTime().toIso8601String().split('T').first;

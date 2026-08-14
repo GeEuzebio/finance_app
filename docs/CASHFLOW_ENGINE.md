@@ -188,6 +188,12 @@ inválido, resolvida abaixo).
   (⚠️ SUPOSIÇÃO: só para determinar em qual fatura cada parcela cai — não é
   uma nova compra real) e vai para a fatura correspondente pela mesma regra
   de fechamento acima.
+- Data de vencimento (`Invoice.dueDate`, resolvida por `FindOrCreateInvoice`
+  ao criar a fatura): ⚠️ SUPOSIÇÃO — cai no mesmo mês do fechamento se
+  `dueDay >= closingDay`; se `dueDay < closingDay`, cai no mês seguinte
+  (padrão comum de fatura brasileira — fecha dia 25, vence dia 5 do mês
+  seguinte). Mesmo clamp de dia inválido do resto do sistema
+  (`clampedMonthDate`, `core/utils/date_only.dart`).
 - Vencimento em fim de semana/feriado: ⚠️ SUPOSIÇÃO — **mantém a data**, sem
   ajuste automático. Um calendário de feriados nacional/estadual/municipal é
   escopo desnecessário para v1; o usuário ajusta manualmente via check-in se
