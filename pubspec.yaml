@@ -1,0 +1,74 @@
+name: finance_app
+description: >
+  App de finanças pessoais focado em previsibilidade de saldo futuro,
+  100% offline-first.
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Estado: único mecanismo de estado do app (ADR 0001) — providers reativos
+  # para streams do Drift e para o resultado da engine de projeção.
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Persistência local (ADR 0002) — SQLite type-safe com migrations
+  # versionadas, sem backend.
+  drift: ^2.18.0
+  # Binário nativo do SQLite para Android/iOS, exigido pelo drift.
+  sqlite3_flutter_libs: ^0.5.24
+  # Resolve o diretório de armazenamento do banco no dispositivo.
+  path_provider: ^2.1.3
+  # Manipulação de caminho de arquivo, usada para montar o path do banco.
+  path: ^1.9.0
+
+  # DI (ADR 0003) — service locator resolvido uma vez em main.dart.
+  get_it: ^7.7.0
+  injectable: ^2.4.2
+
+  # Either<Failure, T> — hierarquia de erro própria sem exceptions
+  # cruzando a fronteira domain/data (docs/ARCHITECTURE.md §6).
+  fpdart: ^1.1.0
+
+  # Entidades imutáveis com copyWith/== geradas — reduz boilerplate manual
+  # nas 8 entidades de domínio (Account, Transaction, etc.).
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # Formatação de moeda (centavos -> "R$ 1.234,56") e datas em pt-BR na UI.
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Codegen compartilhado por drift_dev, riverpod_generator, injectable e
+  # freezed — um único runner (`dart run build_runner build`).
+  build_runner: ^2.4.11
+
+  # Geração das tabelas/queries type-safe a partir das classes Table.
+  drift_dev: ^2.18.0
+
+  # Geração dos providers @riverpod.
+  riverpod_generator: ^2.4.0
+
+  # Geração do container de DI (injection.config.dart) a partir das
+  # anotações @LazySingleton/@Injectable.
+  injectable_generator: ^2.6.1
+
+  # Geração das classes freezed (entidades imutáveis).
+  freezed: ^2.5.2
+
+  # Regras de lint oficiais do time Flutter — sem regras customizadas
+  # próprias enquanto o time é pequeno (YAGNI).
+  flutter_lints: ^4.0.0
+
+  # Mocks/fakes para testar repositórios e casos de uso isolados da
+  # camada data, sem subir um banco real.
+  mocktail: ^1.0.4
