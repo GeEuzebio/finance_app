@@ -25,6 +25,7 @@ mixin _$RecurrenceRule {
   DateOnly get startDate => throw _privateConstructorUsedError;
   DateOnly? get endDate => throw _privateConstructorUsedError;
   int? get occurrenceCount => throw _privateConstructorUsedError;
+  bool get isVariable => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
   /// Create a copy of RecurrenceRule
@@ -50,6 +51,7 @@ abstract class $RecurrenceRuleCopyWith<$Res> {
       DateOnly startDate,
       DateOnly? endDate,
       int? occurrenceCount,
+      bool isVariable,
       DateTime createdAt});
 }
 
@@ -77,6 +79,7 @@ class _$RecurrenceRuleCopyWithImpl<$Res, $Val extends RecurrenceRule>
     Object? startDate = null,
     Object? endDate = freezed,
     Object? occurrenceCount = freezed,
+    Object? isVariable = null,
     Object? createdAt = null,
   }) {
     return _then(_value.copyWith(
@@ -116,6 +119,10 @@ class _$RecurrenceRuleCopyWithImpl<$Res, $Val extends RecurrenceRule>
           ? _value.occurrenceCount
           : occurrenceCount // ignore: cast_nullable_to_non_nullable
               as int?,
+      isVariable: null == isVariable
+          ? _value.isVariable
+          : isVariable // ignore: cast_nullable_to_non_nullable
+              as bool,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -142,6 +149,7 @@ abstract class _$$RecurrenceRuleImplCopyWith<$Res>
       DateOnly startDate,
       DateOnly? endDate,
       int? occurrenceCount,
+      bool isVariable,
       DateTime createdAt});
 }
 
@@ -167,6 +175,7 @@ class __$$RecurrenceRuleImplCopyWithImpl<$Res>
     Object? startDate = null,
     Object? endDate = freezed,
     Object? occurrenceCount = freezed,
+    Object? isVariable = null,
     Object? createdAt = null,
   }) {
     return _then(_$RecurrenceRuleImpl(
@@ -206,6 +215,10 @@ class __$$RecurrenceRuleImplCopyWithImpl<$Res>
           ? _value.occurrenceCount
           : occurrenceCount // ignore: cast_nullable_to_non_nullable
               as int?,
+      isVariable: null == isVariable
+          ? _value.isVariable
+          : isVariable // ignore: cast_nullable_to_non_nullable
+              as bool,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -227,6 +240,7 @@ class _$RecurrenceRuleImpl implements _RecurrenceRule {
       required this.startDate,
       this.endDate,
       this.occurrenceCount,
+      this.isVariable = false,
       required this.createdAt});
 
   @override
@@ -248,11 +262,14 @@ class _$RecurrenceRuleImpl implements _RecurrenceRule {
   @override
   final int? occurrenceCount;
   @override
+  @JsonKey()
+  final bool isVariable;
+  @override
   final DateTime createdAt;
 
   @override
   String toString() {
-    return 'RecurrenceRule(id: $id, accountId: $accountId, description: $description, amountCents: $amountCents, frequency: $frequency, interval: $interval, startDate: $startDate, endDate: $endDate, occurrenceCount: $occurrenceCount, createdAt: $createdAt)';
+    return 'RecurrenceRule(id: $id, accountId: $accountId, description: $description, amountCents: $amountCents, frequency: $frequency, interval: $interval, startDate: $startDate, endDate: $endDate, occurrenceCount: $occurrenceCount, isVariable: $isVariable, createdAt: $createdAt)';
   }
 
   @override
@@ -276,6 +293,8 @@ class _$RecurrenceRuleImpl implements _RecurrenceRule {
             (identical(other.endDate, endDate) || other.endDate == endDate) &&
             (identical(other.occurrenceCount, occurrenceCount) ||
                 other.occurrenceCount == occurrenceCount) &&
+            (identical(other.isVariable, isVariable) ||
+                other.isVariable == isVariable) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -292,6 +311,7 @@ class _$RecurrenceRuleImpl implements _RecurrenceRule {
       startDate,
       endDate,
       occurrenceCount,
+      isVariable,
       createdAt);
 
   /// Create a copy of RecurrenceRule
@@ -315,6 +335,7 @@ abstract class _RecurrenceRule implements RecurrenceRule {
       required final DateOnly startDate,
       final DateOnly? endDate,
       final int? occurrenceCount,
+      final bool isVariable,
       required final DateTime createdAt}) = _$RecurrenceRuleImpl;
 
   @override
@@ -335,6 +356,8 @@ abstract class _RecurrenceRule implements RecurrenceRule {
   DateOnly? get endDate;
   @override
   int? get occurrenceCount;
+  @override
+  bool get isVariable;
   @override
   DateTime get createdAt;
 

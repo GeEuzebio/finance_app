@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_only.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/widgets/state_views.dart';
 import '../domain/entities/check_in_item.dart';
 import 'check_in_providers.dart';
 
@@ -18,7 +19,11 @@ class CheckInScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Check-in')),
       body: itemsAsync.when(
         data: (items) => items.isEmpty
-            ? const _EmptyCheckInState()
+            ? const EmptyStateView(
+                icon: Icons.task_alt,
+                title: 'Tudo em dia',
+                message: 'Nada previsto pra hoje que ainda precise de check-in.',
+              )
             : ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: items.length,
@@ -26,7 +31,10 @@ class CheckInScreen extends ConsumerWidget {
                 itemBuilder: (context, index) => _CheckInCard(item: items[index]),
               ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _ErrorState(message: '$error'),
+        error: (error, _) => ErrorStateView(
+          title: 'Não deu pra carregar o check-in de hoje',
+          message: '$error',
+        ),
       ),
     );
   }
@@ -189,70 +197,3 @@ class _CheckInCard extends ConsumerWidget {
   }
 }
 
-class _EmptyCheckInState extends StatelessWidget {
-  const _EmptyCheckInState();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = AppColors.textMuted(theme.brightness);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.task_alt, size: 48, color: muted),
-            const SizedBox(height: 16),
-            Text(
-              'Tudo em dia',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Nada previsto pra hoje que ainda precise de check-in.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: AppColors.debit(theme.brightness)),
-            const SizedBox(height: 16),
-            Text(
-              'Não deu pra carregar o check-in de hoje',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: AppColors.textMuted(theme.brightness)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

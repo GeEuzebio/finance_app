@@ -18,6 +18,7 @@ class RecurrenceRule with _$RecurrenceRule {
     required DateOnly startDate,
     DateOnly? endDate,
     int? occurrenceCount,
+    @Default(false) bool isVariable,
     required DateTime createdAt,
   }) = _RecurrenceRule;
 }

@@ -25,7 +25,7 @@ final accountRepositoryProvider =
 // ignore: unused_element
 typedef AccountRepositoryRef = AutoDisposeProviderRef<AccountRepository>;
 String _$accountsControllerHash() =>
-    r'9d9d4a3702eb1ab51cc9c248968808e8680c2d38';
+    r'90b0af7350820e8b8b6c57f3d50b5017dec39c44';
 
 /// See also [AccountsController].
 @ProviderFor(AccountsController)

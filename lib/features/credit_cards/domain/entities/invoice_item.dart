@@ -15,6 +15,10 @@ class InvoiceItem with _$InvoiceItem {
     required int installmentNumber,
     required int installmentTotal,
     required String purchaseGroupId,
+    // Preenchido só em itens vindos de importação de fatura OFX/CSV
+    // (M7, #025) — usado pra deduplicar reimportação do mesmo período.
+    // `null` em todo o resto do app.
+    String? externalId,
     required DateTime createdAt,
   }) = _InvoiceItem;
 }

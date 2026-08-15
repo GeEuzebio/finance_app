@@ -2,6 +2,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/di/injection.dart';
+import '../../cashflow_engine/presentation/projection_providers.dart';
 import '../domain/entities/account.dart';
 import '../domain/repositories/account_repository.dart';
 
@@ -22,6 +23,8 @@ class AccountsController extends _$AccountsController {
     final result = await ref.read(accountRepositoryProvider).upsert(account);
     result.match((failure) => throw failure, (_) => null);
     ref.invalidateSelf();
+    ref.invalidate(monthlyProjectionProvider);
+    ref.invalidate(dayLedgerProvider);
     await future;
   }
 }

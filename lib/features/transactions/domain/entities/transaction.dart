@@ -19,6 +19,10 @@ class Transaction with _$Transaction {
     String? originalTransactionId,
     String? transferGroupId,
     String? invoicePaymentForId,
+    // Preenchido só em lançamentos vindos de importação OFX/CSV
+    // (M7, #023) — usado pra deduplicar reimportação do mesmo período.
+    // `null` em todo o resto do app.
+    String? externalId,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _Transaction;

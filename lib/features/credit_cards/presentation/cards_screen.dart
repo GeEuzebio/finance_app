@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/widgets/state_views.dart';
 import '../../accounts/domain/entities/account.dart';
 import '../../accounts/presentation/accounts_providers.dart';
 import '../domain/entities/credit_card.dart';
@@ -21,7 +22,11 @@ class CardsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Cartões')),
       body: cardsAsync.when(
         data: (cards) => cards.isEmpty
-            ? const _EmptyState()
+            ? const EmptyStateView(
+                icon: Icons.credit_card_outlined,
+                title: 'Nenhum cartão ainda',
+                message: 'Cadastre um cartão pra acompanhar fatura, compras e parcelamentos.',
+              )
             : ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                 itemCount: cards.length,
@@ -29,7 +34,10 @@ class CardsScreen extends ConsumerWidget {
                 itemBuilder: (context, index) => _CardTile(card: cards[index]),
               ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _ErrorState(message: '$error'),
+        error: (error, _) => ErrorStateView(
+          title: 'Não deu pra carregar seus cartões',
+          message: '$error',
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateCardDialog(context, ref),
@@ -243,70 +251,3 @@ class _CardTile extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = AppColors.textMuted(theme.brightness);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.credit_card_outlined, size: 48, color: muted),
-            const SizedBox(height: 16),
-            Text(
-              'Nenhum cartão ainda',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Cadastre um cartão pra acompanhar fatura, compras e parcelamentos.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: AppColors.debit(theme.brightness)),
-            const SizedBox(height: 16),
-            Text(
-              'Não deu pra carregar seus cartões',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: AppColors.textMuted(theme.brightness)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

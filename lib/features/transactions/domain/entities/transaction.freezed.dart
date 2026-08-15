@@ -25,7 +25,11 @@ mixin _$Transaction {
   String? get recurrenceRuleId => throw _privateConstructorUsedError;
   String? get originalTransactionId => throw _privateConstructorUsedError;
   String? get transferGroupId => throw _privateConstructorUsedError;
-  String? get invoicePaymentForId => throw _privateConstructorUsedError;
+  String? get invoicePaymentForId =>
+      throw _privateConstructorUsedError; // Preenchido só em lançamentos vindos de importação OFX/CSV
+// (M7, #023) — usado pra deduplicar reimportação do mesmo período.
+// `null` em todo o resto do app.
+  String? get externalId => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
@@ -53,6 +57,7 @@ abstract class $TransactionCopyWith<$Res> {
       String? originalTransactionId,
       String? transferGroupId,
       String? invoicePaymentForId,
+      String? externalId,
       DateTime createdAt,
       DateTime updatedAt});
 }
@@ -82,6 +87,7 @@ class _$TransactionCopyWithImpl<$Res, $Val extends Transaction>
     Object? originalTransactionId = freezed,
     Object? transferGroupId = freezed,
     Object? invoicePaymentForId = freezed,
+    Object? externalId = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -126,6 +132,10 @@ class _$TransactionCopyWithImpl<$Res, $Val extends Transaction>
           ? _value.invoicePaymentForId
           : invoicePaymentForId // ignore: cast_nullable_to_non_nullable
               as String?,
+      externalId: freezed == externalId
+          ? _value.externalId
+          : externalId // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -157,6 +167,7 @@ abstract class _$$TransactionImplCopyWith<$Res>
       String? originalTransactionId,
       String? transferGroupId,
       String? invoicePaymentForId,
+      String? externalId,
       DateTime createdAt,
       DateTime updatedAt});
 }
@@ -184,6 +195,7 @@ class __$$TransactionImplCopyWithImpl<$Res>
     Object? originalTransactionId = freezed,
     Object? transferGroupId = freezed,
     Object? invoicePaymentForId = freezed,
+    Object? externalId = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -228,6 +240,10 @@ class __$$TransactionImplCopyWithImpl<$Res>
           ? _value.invoicePaymentForId
           : invoicePaymentForId // ignore: cast_nullable_to_non_nullable
               as String?,
+      externalId: freezed == externalId
+          ? _value.externalId
+          : externalId // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -254,6 +270,7 @@ class _$TransactionImpl implements _Transaction {
       this.originalTransactionId,
       this.transferGroupId,
       this.invoicePaymentForId,
+      this.externalId,
       required this.createdAt,
       required this.updatedAt});
 
@@ -277,6 +294,11 @@ class _$TransactionImpl implements _Transaction {
   final String? transferGroupId;
   @override
   final String? invoicePaymentForId;
+// Preenchido só em lançamentos vindos de importação OFX/CSV
+// (M7, #023) — usado pra deduplicar reimportação do mesmo período.
+// `null` em todo o resto do app.
+  @override
+  final String? externalId;
   @override
   final DateTime createdAt;
   @override
@@ -284,7 +306,7 @@ class _$TransactionImpl implements _Transaction {
 
   @override
   String toString() {
-    return 'Transaction(id: $id, accountId: $accountId, description: $description, amountCents: $amountCents, date: $date, status: $status, recurrenceRuleId: $recurrenceRuleId, originalTransactionId: $originalTransactionId, transferGroupId: $transferGroupId, invoicePaymentForId: $invoicePaymentForId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Transaction(id: $id, accountId: $accountId, description: $description, amountCents: $amountCents, date: $date, status: $status, recurrenceRuleId: $recurrenceRuleId, originalTransactionId: $originalTransactionId, transferGroupId: $transferGroupId, invoicePaymentForId: $invoicePaymentForId, externalId: $externalId, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -309,6 +331,8 @@ class _$TransactionImpl implements _Transaction {
                 other.transferGroupId == transferGroupId) &&
             (identical(other.invoicePaymentForId, invoicePaymentForId) ||
                 other.invoicePaymentForId == invoicePaymentForId) &&
+            (identical(other.externalId, externalId) ||
+                other.externalId == externalId) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -328,6 +352,7 @@ class _$TransactionImpl implements _Transaction {
       originalTransactionId,
       transferGroupId,
       invoicePaymentForId,
+      externalId,
       createdAt,
       updatedAt);
 
@@ -352,6 +377,7 @@ abstract class _Transaction implements Transaction {
       final String? originalTransactionId,
       final String? transferGroupId,
       final String? invoicePaymentForId,
+      final String? externalId,
       required final DateTime createdAt,
       required final DateTime updatedAt}) = _$TransactionImpl;
 
@@ -374,7 +400,12 @@ abstract class _Transaction implements Transaction {
   @override
   String? get transferGroupId;
   @override
-  String? get invoicePaymentForId;
+  String?
+      get invoicePaymentForId; // Preenchido só em lançamentos vindos de importação OFX/CSV
+// (M7, #023) — usado pra deduplicar reimportação do mesmo período.
+// `null` em todo o resto do app.
+  @override
+  String? get externalId;
   @override
   DateTime get createdAt;
   @override

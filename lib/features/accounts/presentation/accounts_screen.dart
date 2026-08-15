@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_only.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/widgets/state_views.dart';
 import '../domain/entities/account.dart';
 import 'accounts_providers.dart';
 
@@ -19,7 +20,11 @@ class AccountsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Contas')),
       body: accountsAsync.when(
         data: (accounts) => accounts.isEmpty
-            ? const _EmptyState()
+            ? const EmptyStateView(
+                icon: Icons.account_balance_wallet_outlined,
+                title: 'Nenhuma conta ainda',
+                message: 'Adicione sua primeira conta pra começar a ver a previsão do seu saldo.',
+              )
             : ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                 itemCount: accounts.length,
@@ -27,7 +32,10 @@ class AccountsScreen extends ConsumerWidget {
                 itemBuilder: (context, index) => _AccountCard(account: accounts[index]),
               ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _ErrorState(message: '$error'),
+        error: (error, _) => ErrorStateView(
+          title: 'Não deu pra carregar suas contas',
+          message: '$error',
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateAccountDialog(context, ref),
@@ -228,71 +236,3 @@ class _OwnerChip extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = AppColors.textMuted(theme.brightness);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.account_balance_wallet_outlined, size: 48, color: muted),
-            const SizedBox(height: 16),
-            Text(
-              'Nenhuma conta ainda',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Adicione sua primeira conta pra começar a ver a previsão do seu saldo.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: AppColors.debit(theme.brightness)),
-            const SizedBox(height: 16),
-            Text(
-              'Não deu pra carregar suas contas',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.textMuted(theme.brightness),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

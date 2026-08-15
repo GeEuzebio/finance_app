@@ -23,7 +23,11 @@ mixin _$InvoiceItem {
   DateOnly get purchaseDate => throw _privateConstructorUsedError;
   int get installmentNumber => throw _privateConstructorUsedError;
   int get installmentTotal => throw _privateConstructorUsedError;
-  String get purchaseGroupId => throw _privateConstructorUsedError;
+  String get purchaseGroupId =>
+      throw _privateConstructorUsedError; // Preenchido só em itens vindos de importação de fatura OFX/CSV
+// (M7, #025) — usado pra deduplicar reimportação do mesmo período.
+// `null` em todo o resto do app.
+  String? get externalId => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
   /// Create a copy of InvoiceItem
@@ -48,6 +52,7 @@ abstract class $InvoiceItemCopyWith<$Res> {
       int installmentNumber,
       int installmentTotal,
       String purchaseGroupId,
+      String? externalId,
       DateTime createdAt});
 }
 
@@ -74,6 +79,7 @@ class _$InvoiceItemCopyWithImpl<$Res, $Val extends InvoiceItem>
     Object? installmentNumber = null,
     Object? installmentTotal = null,
     Object? purchaseGroupId = null,
+    Object? externalId = freezed,
     Object? createdAt = null,
   }) {
     return _then(_value.copyWith(
@@ -109,6 +115,10 @@ class _$InvoiceItemCopyWithImpl<$Res, $Val extends InvoiceItem>
           ? _value.purchaseGroupId
           : purchaseGroupId // ignore: cast_nullable_to_non_nullable
               as String,
+      externalId: freezed == externalId
+          ? _value.externalId
+          : externalId // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -134,6 +144,7 @@ abstract class _$$InvoiceItemImplCopyWith<$Res>
       int installmentNumber,
       int installmentTotal,
       String purchaseGroupId,
+      String? externalId,
       DateTime createdAt});
 }
 
@@ -158,6 +169,7 @@ class __$$InvoiceItemImplCopyWithImpl<$Res>
     Object? installmentNumber = null,
     Object? installmentTotal = null,
     Object? purchaseGroupId = null,
+    Object? externalId = freezed,
     Object? createdAt = null,
   }) {
     return _then(_$InvoiceItemImpl(
@@ -193,6 +205,10 @@ class __$$InvoiceItemImplCopyWithImpl<$Res>
           ? _value.purchaseGroupId
           : purchaseGroupId // ignore: cast_nullable_to_non_nullable
               as String,
+      externalId: freezed == externalId
+          ? _value.externalId
+          : externalId // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -213,6 +229,7 @@ class _$InvoiceItemImpl implements _InvoiceItem {
       required this.installmentNumber,
       required this.installmentTotal,
       required this.purchaseGroupId,
+      this.externalId,
       required this.createdAt});
 
   @override
@@ -231,12 +248,17 @@ class _$InvoiceItemImpl implements _InvoiceItem {
   final int installmentTotal;
   @override
   final String purchaseGroupId;
+// Preenchido só em itens vindos de importação de fatura OFX/CSV
+// (M7, #025) — usado pra deduplicar reimportação do mesmo período.
+// `null` em todo o resto do app.
+  @override
+  final String? externalId;
   @override
   final DateTime createdAt;
 
   @override
   String toString() {
-    return 'InvoiceItem(id: $id, invoiceId: $invoiceId, description: $description, amountCents: $amountCents, purchaseDate: $purchaseDate, installmentNumber: $installmentNumber, installmentTotal: $installmentTotal, purchaseGroupId: $purchaseGroupId, createdAt: $createdAt)';
+    return 'InvoiceItem(id: $id, invoiceId: $invoiceId, description: $description, amountCents: $amountCents, purchaseDate: $purchaseDate, installmentNumber: $installmentNumber, installmentTotal: $installmentTotal, purchaseGroupId: $purchaseGroupId, externalId: $externalId, createdAt: $createdAt)';
   }
 
   @override
@@ -259,6 +281,8 @@ class _$InvoiceItemImpl implements _InvoiceItem {
                 other.installmentTotal == installmentTotal) &&
             (identical(other.purchaseGroupId, purchaseGroupId) ||
                 other.purchaseGroupId == purchaseGroupId) &&
+            (identical(other.externalId, externalId) ||
+                other.externalId == externalId) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -274,6 +298,7 @@ class _$InvoiceItemImpl implements _InvoiceItem {
       installmentNumber,
       installmentTotal,
       purchaseGroupId,
+      externalId,
       createdAt);
 
   /// Create a copy of InvoiceItem
@@ -295,6 +320,7 @@ abstract class _InvoiceItem implements InvoiceItem {
       required final int installmentNumber,
       required final int installmentTotal,
       required final String purchaseGroupId,
+      final String? externalId,
       required final DateTime createdAt}) = _$InvoiceItemImpl;
 
   @override
@@ -312,7 +338,12 @@ abstract class _InvoiceItem implements InvoiceItem {
   @override
   int get installmentTotal;
   @override
-  String get purchaseGroupId;
+  String
+      get purchaseGroupId; // Preenchido só em itens vindos de importação de fatura OFX/CSV
+// (M7, #025) — usado pra deduplicar reimportação do mesmo período.
+// `null` em todo o resto do app.
+  @override
+  String? get externalId;
   @override
   DateTime get createdAt;
 

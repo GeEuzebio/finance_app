@@ -61,6 +61,7 @@ Transaction transactionFromJson(Map<String, dynamic> row) => Transaction(
       originalTransactionId: row['original_transaction_id'] as String?,
       transferGroupId: row['transfer_group_id'] as String?,
       invoicePaymentForId: row['invoice_payment_for_id'] as String?,
+      externalId: row['external_id'] as String?,
       createdAt: DateTime.parse(row['created_at'] as String),
       updatedAt: DateTime.parse(row['updated_at'] as String),
     );
@@ -76,6 +77,7 @@ Map<String, dynamic> transactionToJson(Transaction transaction) => {
       'original_transaction_id': transaction.originalTransactionId,
       'transfer_group_id': transaction.transferGroupId,
       'invoice_payment_for_id': transaction.invoicePaymentForId,
+      'external_id': transaction.externalId,
       'created_at': transaction.createdAt.toIso8601String(),
       'updated_at': transaction.updatedAt.toIso8601String(),
     };

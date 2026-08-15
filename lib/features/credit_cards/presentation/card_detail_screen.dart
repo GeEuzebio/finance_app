@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_only.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/widgets/state_views.dart';
 import '../domain/entities/invoice.dart';
 import '../domain/entities/invoice_item.dart';
 import 'credit_cards_providers.dart';
@@ -22,7 +23,10 @@ class CardDetailScreen extends ConsumerWidget {
       body: detailAsync.when(
         data: (detail) => _CardDetailBody(cardId: cardId, detail: detail),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _ErrorState(message: '$error'),
+        error: (error, _) => ErrorStateView(
+          title: 'Não deu pra carregar essa fatura',
+          message: '$error',
+        ),
       ),
       floatingActionButton: detailAsync.hasValue
           ? FloatingActionButton(
@@ -321,41 +325,6 @@ class _InvoiceItemTile extends ConsumerWidget {
                   }
                 }
               },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: AppColors.debit(theme.brightness)),
-            const SizedBox(height: 16),
-            Text(
-              'Não deu pra carregar essa fatura',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: AppColors.textMuted(theme.brightness)),
             ),
           ],
         ),

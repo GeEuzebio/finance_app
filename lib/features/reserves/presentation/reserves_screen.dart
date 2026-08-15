@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/widgets/state_views.dart';
 import '../domain/entities/reserve.dart';
 import 'reserves_providers.dart';
 
@@ -18,7 +19,12 @@ class ReservesScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Reservas')),
       body: reservesAsync.when(
         data: (reserves) => reserves.isEmpty
-            ? const _EmptyState()
+            ? const EmptyStateView(
+                icon: Icons.savings_outlined,
+                title: 'Nenhuma reserva ainda',
+                message:
+                    'Crie uma reserva pra separar dinheiro de um objetivo sem tirar do seu saldo livre.',
+              )
             : ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                 itemCount: reserves.length,
@@ -26,7 +32,10 @@ class ReservesScreen extends ConsumerWidget {
                 itemBuilder: (context, index) => _ReserveCard(reserve: reserves[index]),
               ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _ErrorState(message: '$error'),
+        error: (error, _) => ErrorStateView(
+          title: 'Não deu pra carregar suas reservas',
+          message: '$error',
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateReserveDialog(context, ref),
@@ -283,70 +292,3 @@ class _ReserveCard extends ConsumerWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = AppColors.textMuted(theme.brightness);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.savings_outlined, size: 48, color: muted),
-            const SizedBox(height: 16),
-            Text(
-              'Nenhuma reserva ainda',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Crie uma reserva pra separar dinheiro de um objetivo sem tirar do seu saldo livre.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: AppColors.debit(theme.brightness)),
-            const SizedBox(height: 16),
-            Text(
-              'Não deu pra carregar suas reservas',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: AppColors.textMuted(theme.brightness)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

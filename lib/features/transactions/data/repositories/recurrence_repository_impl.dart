@@ -62,6 +62,7 @@ RecurrenceRule recurrenceRuleFromJson(Map<String, dynamic> row) => RecurrenceRul
           ? null
           : DateOnly.fromDateTime(DateTime.parse(row['end_date'] as String)),
       occurrenceCount: row['occurrence_count'] as int?,
+      isVariable: row['is_variable'] as bool? ?? false,
       createdAt: DateTime.parse(row['created_at'] as String),
     );
 
@@ -75,5 +76,6 @@ Map<String, dynamic> recurrenceRuleToJson(RecurrenceRule rule) => {
       'start_date': rule.startDate.toDateTime().toIso8601String().split('T').first,
       'end_date': rule.endDate?.toDateTime().toIso8601String().split('T').first,
       'occurrence_count': rule.occurrenceCount,
+      'is_variable': rule.isVariable,
       'created_at': rule.createdAt.toIso8601String(),
     };

@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/errors/failure.dart';
+import '../../cashflow_engine/presentation/projection_providers.dart';
 import '../domain/entities/reserve.dart';
 import '../domain/repositories/reserve_repository.dart';
 import '../domain/usecases/contribute_to_reserve.dart';
@@ -53,6 +54,8 @@ class ReservesController extends _$ReservesController {
     final result = await action();
     result.match((failure) => throw failure, (_) => null);
     ref.invalidateSelf();
+    ref.invalidate(monthlyProjectionProvider);
+    ref.invalidate(dayLedgerProvider);
     await future;
   }
 }

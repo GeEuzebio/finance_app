@@ -1,3 +1,4 @@
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -15,4 +16,8 @@ abstract class RegisterModule {
   // main.dart — aqui só expomos a instância para o container de DI.
   @lazySingleton
   SupabaseClient get supabaseClient => Supabase.instance.client;
+
+  @lazySingleton
+  FlutterLocalNotificationsPlugin get notificationsPlugin =>
+      FlutterLocalNotificationsPlugin();
 }

@@ -47,6 +47,24 @@ dependencies:
   # de cada plataforma (docs/DESIGN.md).
   google_fonts: ^8.2.1
 
+  # Preferências locais do app (tema, horizonte de projeção, meta de
+  # economia) — únicos dados que não são compartilhados entre os dois
+  # usuários via Supabase (M7, #019).
+  shared_preferences: ^2.5.5
+
+  # Lembrete diário de check-in (M7, #022) — agenda uma notificação local
+  # recorrente no horário escolhido em Configurações, sem servidor.
+  flutter_local_notifications: ^22.3.0
+  timezone: ^0.11.1
+
+  # Importação de extrato OFX/CSV (M7, #023 — docs/adr/0006-open-finance.md
+  # escolheu esse caminho em vez de integração bancária direta).
+  file_picker: ^12.0.0
+
+  # Bottom nav animada (pedido explícito do usuário, M7) — substitui a
+  # NavigationBar padrão do Material em main.dart.
+  animated_bottom_navigation_bar: ^1.4.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -72,11 +90,6 @@ dev_dependencies:
   # Mocks/fakes para testar repositórios e casos de uso isolados da
   # camada data, sem depender de uma conexão real com o Supabase.
   mocktail: ^1.0.4
-
-  # SharedPreferences.setMockInitialValues — Supabase.initialize() guarda
-  # sessão local via shared_preferences; em teste de VM isso precisa de
-  # mock explícito (sem platform channel real).
-  shared_preferences: ^2.5.5
 
 flutter:
   uses-material-design: true

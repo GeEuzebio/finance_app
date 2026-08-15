@@ -169,6 +169,7 @@ InvoiceItem invoiceItemFromJson(Map<String, dynamic> row) => InvoiceItem(
       installmentNumber: row['installment_number'] as int,
       installmentTotal: row['installment_total'] as int,
       purchaseGroupId: row['purchase_group_id'] as String,
+      externalId: row['external_id'] as String?,
       createdAt: DateTime.parse(row['created_at'] as String),
     );
 
@@ -181,5 +182,6 @@ Map<String, dynamic> invoiceItemToJson(InvoiceItem item) => {
       'installment_number': item.installmentNumber,
       'installment_total': item.installmentTotal,
       'purchase_group_id': item.purchaseGroupId,
+      'external_id': item.externalId,
       'created_at': item.createdAt.toIso8601String(),
     };

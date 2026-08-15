@@ -55,7 +55,8 @@ class CheckInController extends _$CheckInController {
     final result = await action();
     result.match((failure) => throw failure, (_) => null);
     ref.invalidateSelf();
-    ref.invalidate(dailyProjectionProvider);
+    ref.invalidate(monthlyProjectionProvider);
+    ref.invalidate(dayLedgerProvider);
     await future;
   }
 }

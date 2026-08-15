@@ -84,7 +84,7 @@ final withdrawFromReserveUseCaseProvider =
 typedef WithdrawFromReserveUseCaseRef
     = AutoDisposeProviderRef<WithdrawFromReserve>;
 String _$reservesControllerHash() =>
-    r'50eb0bb35567fdd96f600026fc97a7d1c80419da';
+    r'bbd8361d8d2f706746c235f618271739fefa0f51';
 
 /// See also [ReservesController].
 @ProviderFor(ReservesController)

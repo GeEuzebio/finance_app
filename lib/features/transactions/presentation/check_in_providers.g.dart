@@ -104,7 +104,7 @@ final postponeCheckInItemUseCaseProvider =
 // ignore: unused_element
 typedef PostponeCheckInItemUseCaseRef
     = AutoDisposeProviderRef<PostponeCheckInItem>;
-String _$checkInControllerHash() => r'af9e6266a4b9f90cdb75d05028930afe3ab3be07';
+String _$checkInControllerHash() => r'fa5b2eb4dc118ef68af624dd11c782eba6ec6706';
 
 /// See also [CheckInController].
 @ProviderFor(CheckInController)
