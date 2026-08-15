@@ -27,7 +27,6 @@ class ImportScreen extends ConsumerStatefulWidget {
 
 class _ImportScreenState extends ConsumerState<ImportScreen> {
   var _target = _ImportTarget.extrato;
-  String? _accountId;
   String? _creditCardId;
   String? _fileName;
   List<ParsedTransaction>? _parsed;
@@ -42,19 +41,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Importar')),
-      body: destinations == 0 && accounts.isEmpty && cards.isEmpty
-          ? Padding(
-              padding: const EdgeInsets.all(32),
-              child: Center(
-                child: Text(
-                  'Crie uma conta ou um cartão antes de importar.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: AppColors.textMuted(theme.brightness)),
-                ),
-              ),
-            )
-          : ListView(
+      body: ListView(
               padding: const EdgeInsets.all(16),
               children: [
                 SegmentedButton<_ImportTarget>(
@@ -82,37 +69,22 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                       ?.copyWith(color: AppColors.textMuted(theme.brightness)),
                 ),
                 const SizedBox(height: 20),
-                if (_target == _ImportTarget.extrato)
-                  if (accounts.isEmpty)
+                if (_target == _ImportTarget.fatura)
+                  if (cards.isEmpty)
                     Text(
-                      'Crie uma conta antes de importar um extrato.',
+                      'Crie um cartão antes de importar uma fatura.',
                       style: theme.textTheme.bodyMedium
                           ?.copyWith(color: AppColors.textMuted(theme.brightness)),
                     )
                   else
                     DropdownButtonFormField<String>(
-                      initialValue: _accountId ?? accounts.first.id,
-                      decoration: const InputDecoration(labelText: 'Conta de destino'),
-                      items: accounts
-                          .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
+                      initialValue: _creditCardId ?? cards.first.id,
+                      decoration: const InputDecoration(labelText: 'Cartão de destino'),
+                      items: cards
+                          .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
                           .toList(),
-                      onChanged: (value) => setState(() => _accountId = value),
-                    )
-                else if (cards.isEmpty)
-                  Text(
-                    'Crie um cartão antes de importar uma fatura.',
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: AppColors.textMuted(theme.brightness)),
-                  )
-                else
-                  DropdownButtonFormField<String>(
-                    initialValue: _creditCardId ?? cards.first.id,
-                    decoration: const InputDecoration(labelText: 'Cartão de destino'),
-                    items: cards
-                        .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
-                        .toList(),
-                    onChanged: (value) => setState(() => _creditCardId = value),
-                  ),
+                      onChanged: (value) => setState(() => _creditCardId = value),
+                    ),
                 const SizedBox(height: 20),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.upload_file_outlined),
@@ -213,8 +185,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       final ImportResult result;
       if (_target == _ImportTarget.extrato) {
         final accounts = ref.read(accountsControllerProvider).valueOrNull ?? const <Account>[];
-        final accountId = _accountId ?? accounts.first.id;
-        result = await notifier.import(accountId: accountId, parsed: parsed);
+        result = await notifier.import(accountId: accounts.first.id, parsed: parsed);
       } else {
         final cards = ref.read(creditCardsControllerProvider).valueOrNull ?? const <CreditCard>[];
         final creditCardId = _creditCardId ?? cards.first.id;

@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/di/injection.dart';
 import 'core/theme/app_theme.dart';
+import 'features/accounts/domain/repositories/account_repository.dart';
+import 'features/accounts/presentation/accounts_providers.dart';
 import 'features/cashflow_engine/presentation/month_screen.dart';
 import 'features/cashflow_engine/presentation/projection_screen.dart';
 import 'features/notifications/notification_service.dart';
@@ -27,6 +29,7 @@ Future<void> main() async {
   await Supabase.initialize(url: _supabaseUrl, publishableKey: _supabaseAnonKey);
   configureDependencies();
   await getIt<NotificationService>().initialize();
+  await ensureDefaultAccount(getIt<AccountRepository>());
   runApp(const ProviderScope(child: _App()));
 }
 

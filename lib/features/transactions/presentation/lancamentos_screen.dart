@@ -21,7 +21,6 @@ class LancamentosScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dataAsync = ref.watch(lancamentosControllerProvider);
     final accounts = ref.watch(accountsControllerProvider).valueOrNull ?? const <Account>[];
-    final accountName = {for (final a in accounts) a.id: a.name};
 
     return Scaffold(
       appBar: AppBar(title: const Text('Lançamentos')),
@@ -41,21 +40,21 @@ class LancamentosScreen extends ConsumerWidget {
                 const _SectionHeader('Contas fixas'),
                 ...data.fixas.map((r) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: _RecurrenceCard(rule: r, accountName: accountName[r.accountId]),
+                      child: _RecurrenceCard(rule: r),
                     )),
               ],
               if (data.variaveis.isNotEmpty) ...[
                 const _SectionHeader('Contas variáveis'),
                 ...data.variaveis.map((r) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: _RecurrenceCard(rule: r, accountName: accountName[r.accountId]),
+                      child: _RecurrenceCard(rule: r),
                     )),
               ],
               if (data.avulsos.isNotEmpty) ...[
                 const _SectionHeader('Avulsos'),
                 ...data.avulsos.map((t) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: _TransactionCard(transaction: t, accountName: accountName[t.accountId]),
+                      child: _TransactionCard(transaction: t),
                     )),
               ],
             ],
@@ -75,19 +74,12 @@ class LancamentosScreen extends ConsumerWidget {
   }
 
   Future<void> _showCreateDialog(BuildContext context, WidgetRef ref, List<Account> accounts) async {
-    if (accounts.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Crie uma conta antes de cadastrar um lançamento.')),
-      );
-      return;
-    }
-
     final formKey = GlobalKey<FormState>();
     final descriptionController = TextEditingController();
     final amountController = TextEditingController();
     final intervalController = TextEditingController(text: '1');
     var tipo = _Tipo.avulso;
-    var accountId = accounts.first.id;
+    final accountId = accounts.first.id;
     var isEntrada = false;
     var date = DateOnly.fromDateTime(DateTime.now());
     var endDate = DateOnly.fromDateTime(DateTime.now());
@@ -114,15 +106,6 @@ class LancamentosScreen extends ConsumerWidget {
                     ],
                     selected: {tipo},
                     onSelectionChanged: (s) => setState(() => tipo = s.first),
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: accountId,
-                    decoration: const InputDecoration(labelText: 'Conta'),
-                    items: accounts
-                        .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
-                        .toList(),
-                    onChanged: (value) => setState(() => accountId = value ?? accountId),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -349,10 +332,9 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _TransactionCard extends StatelessWidget {
-  const _TransactionCard({required this.transaction, this.accountName});
+  const _TransactionCard({required this.transaction});
 
   final Transaction transaction;
-  final String? accountName;
 
   @override
   Widget build(BuildContext context) {
@@ -373,7 +355,7 @@ class _TransactionCard extends StatelessWidget {
                   Text(transaction.description, style: theme.textTheme.bodyLarge),
                   const SizedBox(height: 4),
                   Text(
-                    '${accountName ?? ''} · ${_formatDate(transaction.date)}',
+                    _formatDate(transaction.date),
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: AppColors.textMuted(theme.brightness)),
                   ),
@@ -392,10 +374,9 @@ class _TransactionCard extends StatelessWidget {
 }
 
 class _RecurrenceCard extends StatelessWidget {
-  const _RecurrenceCard({required this.rule, this.accountName});
+  const _RecurrenceCard({required this.rule});
 
   final RecurrenceRule rule;
-  final String? accountName;
 
   @override
   Widget build(BuildContext context) {
@@ -416,7 +397,7 @@ class _RecurrenceCard extends StatelessWidget {
                   Text(rule.description, style: theme.textTheme.bodyLarge),
                   const SizedBox(height: 4),
                   Text(
-                    '${accountName ?? ''} · ${_frequencyLabel(rule.frequency)}',
+                    _frequencyLabel(rule.frequency),
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: AppColors.textMuted(theme.brightness)),
                   ),

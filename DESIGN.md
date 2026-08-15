@@ -181,14 +181,16 @@ dinheiro" (`PRODUCT.md`).
   itens de dados, então não precisa da moldura de `Card` que dá peso
   visual a "isto é um registro". `SegmentedButton` pra Aparência (escolha
   discreta, aplica na hora); `TextField` com `suffixIcon` de check pra
-  Projeção/Economia (edição explícita, sem auto-save — mesmo padrão de
-  "ação deliberada" do resto do app); `SwitchListTile` pra Notificações
+  Saldo inicial/Projeção/Economia (edição explícita, sem auto-save —
+  mesmo padrão de "ação deliberada" do resto do app; Saldo inicial é a
+  única forma de corrigir o ponto de partida do saldo agora que não
+  existe mais tela de conta, M7 #027); `SwitchListTile` pra Notificações
   (M7, #022) — liga/desliga de verdade (pede permissão, agenda/cancela a
   notificação), com uma segunda linha "Horário" que só aparece quando o
   lembrete está ligado (esconder o que não se aplica, mesmo princípio do
   diálogo de Lançamentos) e abre o `showTimePicker` nativo; `ListTile`
-  com `chevron_right` pra navegar a Contas/Cartões/Reservas, que saíram
-  da bottom nav e agora só se chega por aqui (`settings_screen.dart`).
+  com `chevron_right` pra navegar a Cartões/Reservas, que saíram da
+  bottom nav e agora só se chega por aqui (`settings_screen.dart`).
 - **Mês**: 3 `Card`s empilhados — Performance (5 linhas: Entradas,
   Saídas, Custo diário, Economizado, Gastos com cartão — entradas e
   economizado em verde de crédito, o resto em vermelho de débito, mesmo
@@ -224,11 +226,19 @@ dinheiro" (`PRODUCT.md`).
   widget — recriado via `Semantics(label: ...)` em volta de cada ícone
   pra não perder leitor de tela (`main.dart`).
 - **Importar fatura**: mesma tela de importação de extrato ganhou um
-  `SegmentedButton` Extrato/Fatura no topo — Extrato mantém o fluxo
-  original (dropdown de conta); Fatura troca pra dropdown de cartão e
-  gera `InvoiceItem` em vez de `Transaction`, mesmo preview de 5 linhas e
-  mesmo `FilledButton` condicional das outras telas
+  `SegmentedButton` Extrato/Fatura no topo — Extrato importa direto pra
+  conta única (M7 #027, sem dropdown); Fatura troca pra dropdown de
+  cartão e gera `InvoiceItem` em vez de `Transaction`, mesmo preview de 5
+  linhas e mesmo `FilledButton` condicional das outras telas
   (`import_screen.dart`).
+- **Sem campo "Conta" nos formulários** (M7, #027): o app foi de "várias
+  contas com dropdown em todo diálogo" pra uma conta única implícita —
+  os diálogos de novo lançamento, novo movimento (Projeção) e novo
+  cartão perderam o campo "Conta"/"Conta de pagamento" (usam a única
+  conta direto, sem perguntar), e os cards de check-in e de
+  detalhamento de dia pararam de mostrar o nome da conta, porque com uma
+  só ele não carrega informação — mesmo princípio de "esconder o que não
+  se aplica" do resto do app.
 
 ## O que falta (não inventado aqui)
 

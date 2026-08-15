@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/state_views.dart';
-import '../../accounts/presentation/accounts_screen.dart';
+import '../../accounts/domain/entities/account.dart';
+import '../../accounts/presentation/accounts_providers.dart';
 import '../../credit_cards/presentation/cards_screen.dart';
 import '../../imports/presentation/import_screen.dart';
 import '../../reserves/presentation/reserves_screen.dart';
@@ -18,18 +19,27 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _horizonController = TextEditingController();
   final _savingsController = TextEditingController();
+  final _balanceController = TextEditingController();
   var _controllersInitialized = false;
+  var _balanceControllerInitialized = false;
 
   @override
   void dispose() {
     _horizonController.dispose();
     _savingsController.dispose();
+    _balanceController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(settingsControllerProvider);
+    final accounts = ref.watch(accountsControllerProvider).valueOrNull ?? const <Account>[];
+
+    if (!_balanceControllerInitialized && accounts.isNotEmpty) {
+      _balanceController.text = (accounts.first.initialBalanceCents / 100).toStringAsFixed(2);
+      _balanceControllerInitialized = true;
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
@@ -56,6 +66,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               const SizedBox(height: 24),
               const _SectionHeader('Projeção'),
+              if (accounts.isNotEmpty)
+                _MoneyField(
+                  label: 'Saldo inicial (R\$)',
+                  controller: _balanceController,
+                  onSave: (cents) =>
+                      ref.read(accountsControllerProvider.notifier).updateInitialBalance(cents),
+                ),
+              if (accounts.isNotEmpty) const SizedBox(height: 12),
               _NumberField(
                 label: 'Horizonte de projeção (dias)',
                 controller: _horizonController,
@@ -104,19 +122,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const _SectionHeader('Contas e cartões'),
+              const _SectionHeader('Cartões e reservas'),
               Card(
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: const Icon(Icons.account_balance_outlined),
-                      title: const Text('Contas'),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const AccountsScreen()),
-                      ),
-                    ),
-                    const Divider(height: 1),
                     ListTile(
                       leading: const Icon(Icons.credit_card_outlined),
                       title: const Text('Cartões'),
@@ -206,6 +215,32 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+class _MoneyField extends StatelessWidget {
+  const _MoneyField({required this.label, required this.controller, required this.onSave});
+
+  final String label;
+  final TextEditingController controller;
+  final void Function(int cents) onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+      decoration: InputDecoration(
+        labelText: label,
+        suffixIcon: IconButton(
+          icon: const Icon(Icons.check),
+          onPressed: () {
+            final amount = double.tryParse(controller.text.replaceAll(',', '.'));
+            if (amount != null) onSave((amount * 100).round());
+          },
+        ),
       ),
     );
   }

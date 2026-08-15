@@ -48,19 +48,14 @@ class CardsScreen extends ConsumerWidget {
 
   Future<void> _showCreateCardDialog(BuildContext context, WidgetRef ref) async {
     final accounts = ref.read(accountsControllerProvider).valueOrNull ?? const <Account>[];
-    if (accounts.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Crie uma conta antes de cadastrar um cartão.')),
-      );
-      return;
-    }
+    if (accounts.isEmpty) return;
 
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController();
     final closingDayController = TextEditingController();
     final dueDayController = TextEditingController();
     final limitController = TextEditingController();
-    var paymentAccountId = accounts.first.id;
+    final paymentAccountId = accounts.first.id;
     var owner = AccountOwner.eu;
 
     await showDialog<void>(
@@ -79,16 +74,6 @@ class CardsScreen extends ConsumerWidget {
                     decoration: const InputDecoration(labelText: 'Nome'),
                     validator: (value) =>
                         (value == null || value.isEmpty) ? 'Obrigatório' : null,
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: paymentAccountId,
-                    decoration: const InputDecoration(labelText: 'Conta de pagamento'),
-                    items: accounts
-                        .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
-                        .toList(),
-                    onChanged: (value) =>
-                        setState(() => paymentAccountId = value ?? paymentAccountId),
                   ),
                   const SizedBox(height: 12),
                   Row(

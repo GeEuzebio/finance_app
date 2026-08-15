@@ -68,3 +68,38 @@ precisar de credencial nenhuma além do próprio login do usuário no banco
   (servidor MCP), não uma peça de infraestrutura que um app Flutter
   consome; além disso implica mandar dado financeiro sensível por um
   provedor de LLM, o que essa ADR trata como inaceitável pro caso de uso.
+- **UPX (`financial-mcp-pf`)** (M7, pesquisado após pedido do usuário por
+  um serviço pago barato): descartado pelo mesmo motivo do `banco-mcp`.
+  É um servidor MCP — conecta assistentes de IA (Claude, ChatGPT, Cursor)
+  a dados bancários via Open Finance, não expõe nenhuma API REST própria
+  pra terceiros (a "documentação" só lista os endpoints de descoberta do
+  próprio MCP: `openapi.json`, `tools.json`, `.well-known/oauth-...`).
+  Não existe forma de um app Flutter consumir isso como backend sem
+  passar pela camada de host de IA — mesmo problema de exposição de dado
+  bancário sensível já rejeitado acima. Preço (R$34,90–49,90/mês,
+  Pessoa Física, sem CNPJ) seria atrativo, mas é irrelevante — o produto
+  simplesmente não serve pro caso de uso.
+  - De passagem, os preços de mercado dos agregadores citados acima
+    foram confirmados/atualizados nesta pesquisa: **Pluggy ~R$2.500/mês,
+    Belvo ~R$6.000/mês, Tecnospeed ~R$1.500 de entrada + R$540/mês**
+    (relatos de outros desenvolvedores brasileiros construindo apps
+    similares em 2026) — reforça o descarte acima com números reais em
+    vez de estimativa.
+  - Existe uma via gratuita e tecnicamente viável que não chegou a ser
+    perseguida: **Meu Pluggy + "Conector 200"** — o usuário conecta a
+    própria conta em meu.pluggy.ai (Pluggy como TPP regulado) e o app
+    consumiria a API de dados da Pluggy de graça, sem CNPJ nem
+    mensalidade. Fica registrado aqui só como referência técnica, não
+    como decisão pendente — ver próximo parágrafo.
+
+## Por que a pergunta deixou de fazer sentido
+Ao apresentar a comparação acima, ficou claro que o produto **não
+precisa** de leitura automática de saldo/extrato bancário — o que
+faltava era só registrar entradas, saídas e gastos com cartão, e isso já
+está coberto por `#018` (lançamentos avulsos/fixos/variáveis), `#011`
+(compra e parcelamento de cartão) e `#023`/`#025` (importação
+semi-automática de extrato/fatura via OFX/CSV, sem nenhum terceiro com
+acesso à conta). Não é mais "adiado por custo" — é "não necessário".
+Este tópico só deve ser reaberto se o produto crescer pra além do uso
+doméstico de duas pessoas (cenário já previsto na seção de Consequências
+acima).

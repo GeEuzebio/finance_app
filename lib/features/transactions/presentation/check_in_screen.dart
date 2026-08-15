@@ -68,12 +68,6 @@ class _CheckInCard extends ConsumerWidget {
                         item.description,
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.accountName,
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(color: AppColors.textMuted(theme.brightness)),
-                      ),
                     ],
                   ),
                 ),

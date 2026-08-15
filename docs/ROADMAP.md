@@ -391,6 +391,57 @@ sessão (mesmo dispositivo em que #023 e #025 já tiveram esse problema);
 cobertos pelos 4 testes unitários e pela reutilização direta do diálogo
 já validado do #018. Status: concluído.
 
+### #027 — Contas removidas da UI (conta única implícita)
+Depois de fechar a questão de integração bancária (`docs/adr/0006-open-finance.md`,
+UPX descartado), o usuário pediu pra ir além: nenhuma gestão de "Contas"
+no app — só entradas, saídas e cartão, tudo manual.
+
+`Account` não é um detalhe de UI, é a âncora do motor de projeção
+inteiro: todo `Transaction`, `RecurrenceRule` e
+`CreditCard.paymentAccountId` aponta pra um `accountId`, e
+`project_cashflow.dart` calcula saldo por conta antes de consolidar
+(docs/CASHFLOW_ENGINE.md). Por isso a via escolhida foi a de menor risco
+— **uma única conta implícita por baixo dos panos**, não remover
+`Account` do domínio:
+
+- `ensureDefaultAccount(AccountRepository)` (`accounts_providers.dart`)
+  provisiona uma conta padrão (`name: 'Saldo'`, saldo inicial 0) se
+  `getAll()` vier vazio — nenhuma tela pede pro usuário criar conta.
+  `createAccount` virou `updateInitialBalance(cents)`, que reancora
+  `initialBalanceCents`/`initialBalanceDate` em "agora" a cada edição
+  (evita reconciliar retroativo).
+  - ⚠️ **Bug encontrado na validação**: chamar `ensureDefaultAccount` só
+    de dentro de `AccountsController.build()` não bastava —
+    `GetDailyProjection` lê `AccountRepository` direto (nunca passa por
+    `AccountsController`), e a Projeção é a primeira tela do app. Resultado:
+    abrir o app do zero mostrava o estado vazio "Cadastre uma conta", porque
+    a auto-provisão só rodava se alguma outra tela (Lançamentos, Cartões,
+    Configurações) fosse aberta primeiro. Corrigido chamando
+    `ensureDefaultAccount` também no boot (`main.dart`, logo após
+    `configureDependencies()`), antes de `runApp` — garante que a conta
+    existe antes de qualquer tela renderizar, independente de qual for a
+    primeira. Validado no simulador com a tabela `accounts` vazia de
+    verdade: reabrir o app cria a conta sozinho e a Projeção já mostra
+    R$ 0,00 por dia, sem pedir nada.
+- `AccountsScreen` deletada. Todo campo "Conta" nos diálogos de novo
+  lançamento (`lancamentos_screen.dart`), novo movimento
+  (`projection_screen.dart`), novo cartão (`cards_screen.dart`) e
+  importar extrato (`import_screen.dart`) foi removido — usam
+  `accounts.first.id` direto, sem perguntar. `accountName` parou de
+  aparecer nos cards de check-in e detalhamento de dia (com 1 conta só,
+  não carrega informação).
+- Configurações ganhou o campo "Saldo inicial (R\$)" na seção Projeção
+  (novo `_MoneyField`, mesmo padrão visual do `_NumberField` já usado
+  ali) — é como o usuário corrige o saldo de partida agora que não existe
+  mais tela de conta.
+
+⚠️ **O que ficou intocado, de propósito**: `supabase/schema.sql`,
+`project_cashflow.dart`, `get_daily_projection.dart`,
+`get_day_ledger.dart`, `get_today_check_in_items.dart` e todos os 99
+testes existentes — a engine continua recebendo exatamente a mesma forma
+de dado (`List<Account>`), só que sempre com 1 item. Nenhuma migração
+precisou ser escrita. Status: concluído.
+
 ## Backlog (fora da ordem atual — decisões já tomadas, implementação adiada)
 
 Discutido e decidido em sessão, mas propositalmente adiado até M0–M6

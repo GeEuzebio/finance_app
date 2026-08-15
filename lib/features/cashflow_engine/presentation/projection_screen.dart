@@ -95,17 +95,12 @@ class _ProjectionScreenState extends ConsumerState<ProjectionScreen> {
 
   Future<void> _openAddDialog(BuildContext context) async {
     final accounts = ref.read(accountsControllerProvider).valueOrNull ?? const <Account>[];
-    if (accounts.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Crie uma conta antes de lançar um movimento.')),
-      );
-      return;
-    }
+    if (accounts.isEmpty) return;
 
     final today = DateOnly.fromDateTime(DateTime.now());
     final isCurrentMonth = _month.year == today.year && _month.month == today.month;
     var date = isCurrentMonth ? today : DateOnly(_month.year, _month.month, 1);
-    var accountId = accounts.first.id;
+    final accountId = accounts.first.id;
     var isEntrada = false;
     final formKey = GlobalKey<FormState>();
     final descriptionController = TextEditingController();
@@ -141,15 +136,6 @@ class _ProjectionScreenState extends ConsumerState<ProjectionScreen> {
                         child: const Text('Alterar'),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: accountId,
-                    decoration: const InputDecoration(labelText: 'Conta'),
-                    items: accounts
-                        .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
-                        .toList(),
-                    onChanged: (value) => setDialogState(() => accountId = value ?? accountId),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
