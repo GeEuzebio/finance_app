@@ -21,6 +21,21 @@ futuro, não categorização do passado. Calcula o saldo previsto de cada dia
 dos próximos meses a partir do saldo conciliado da conta + lançamentos
 recorrentes + lançamentos pontuais futuros + faturas de cartão projetadas.
 
+⚠️ **Ajuste consciente (M7, #029)**: com o app em uso real, "pra onde vai
+meu dinheiro" virou uma pergunta que a previsibilidade sozinha não
+respondia — categorização de lançamentos (Moradia/Alimentação/Transporte/
+Lazer/Saúde/Outros) foi adicionada, com um resumo mensal e um guia
+50/30/20. Isso é **aditivo**, não uma reversão da tese: a projeção diária
+continua sendo o mecanismo central e a razão de existir do app; a
+categoria é uma lente sobre esse mesmo dado, não um catálogo de gastos
+separado nem o foco da navegação.
+
+⚠️ **Ajuste consciente (M7, #031)**: sugestões geradas por IA
+(`docs/adr/0007-ai-insights.md`) foram adicionadas como recurso
+**opcional e opt-in**, não como parte do núcleo — a projeção diária
+continua sendo o mecanismo central; a IA só interpreta, sob demanda, um
+resumo já agregado do que a engine e a categorização já calculam.
+
 ## Positioning
 
 Concorrentes (apps de categorização de gasto) respondem "onde você

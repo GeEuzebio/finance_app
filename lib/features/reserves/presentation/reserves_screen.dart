@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../cashflow_engine/presentation/month_providers.dart';
 import '../domain/entities/reserve.dart';
 import 'reserves_providers.dart';
 
@@ -49,6 +50,10 @@ class ReservesScreen extends ConsumerWidget {
     final nameController = TextEditingController();
     final initialController = TextEditingController(text: '0');
     final targetController = TextEditingController();
+    // Sugestão de meta (M7, #029) — 3x/6x o custo de vida do mês corrente,
+    // preenche o campo Meta ao tocar; usuário ainda pode digitar o próprio
+    // valor por cima.
+    final costOfLiving = ref.read(monthlySummaryProvider).valueOrNull?.costOfLivingCents ?? 0;
 
     await showDialog<void>(
       context: context,
@@ -86,6 +91,24 @@ class ReservesScreen extends ConsumerWidget {
                         ? 'Valor inválido'
                         : null),
               ),
+              if (costOfLiving > 0) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    ActionChip(
+                      label: Text('3x custo de vida: ${formatCents(costOfLiving * 3)}'),
+                      onPressed: () => targetController.text =
+                          (costOfLiving * 3 / 100).toStringAsFixed(2),
+                    ),
+                    ActionChip(
+                      label: Text('6x: ${formatCents(costOfLiving * 6)}'),
+                      onPressed: () => targetController.text =
+                          (costOfLiving * 6 / 100).toStringAsFixed(2),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

@@ -23,7 +23,12 @@ mixin _$MonthlySummary {
   int get dailyCostCents => throw _privateConstructorUsedError;
   int get savedCents => throw _privateConstructorUsedError;
   double get savingsPercent => throw _privateConstructorUsedError;
-  bool get isSavingsOnTarget => throw _privateConstructorUsedError;
+  bool get isSavingsOnTarget =>
+      throw _privateConstructorUsedError; // Mesma composição de custo de vida (saídas + gasto de cartão),
+// bucketada por categoria — soma dos valores bate com
+// costOfLivingCents (M7, #029).
+  Map<TransactionCategory, int> get categoryCents =>
+      throw _privateConstructorUsedError;
 
   /// Create a copy of MonthlySummary
   /// with the given fields replaced by the non-null parameter values.
@@ -46,7 +51,8 @@ abstract class $MonthlySummaryCopyWith<$Res> {
       int dailyCostCents,
       int savedCents,
       double savingsPercent,
-      bool isSavingsOnTarget});
+      bool isSavingsOnTarget,
+      Map<TransactionCategory, int> categoryCents});
 }
 
 /// @nodoc
@@ -72,6 +78,7 @@ class _$MonthlySummaryCopyWithImpl<$Res, $Val extends MonthlySummary>
     Object? savedCents = null,
     Object? savingsPercent = null,
     Object? isSavingsOnTarget = null,
+    Object? categoryCents = null,
   }) {
     return _then(_value.copyWith(
       incomeCents: null == incomeCents
@@ -106,6 +113,10 @@ class _$MonthlySummaryCopyWithImpl<$Res, $Val extends MonthlySummary>
           ? _value.isSavingsOnTarget
           : isSavingsOnTarget // ignore: cast_nullable_to_non_nullable
               as bool,
+      categoryCents: null == categoryCents
+          ? _value.categoryCents
+          : categoryCents // ignore: cast_nullable_to_non_nullable
+              as Map<TransactionCategory, int>,
     ) as $Val);
   }
 }
@@ -126,7 +137,8 @@ abstract class _$$MonthlySummaryImplCopyWith<$Res>
       int dailyCostCents,
       int savedCents,
       double savingsPercent,
-      bool isSavingsOnTarget});
+      bool isSavingsOnTarget,
+      Map<TransactionCategory, int> categoryCents});
 }
 
 /// @nodoc
@@ -150,6 +162,7 @@ class __$$MonthlySummaryImplCopyWithImpl<$Res>
     Object? savedCents = null,
     Object? savingsPercent = null,
     Object? isSavingsOnTarget = null,
+    Object? categoryCents = null,
   }) {
     return _then(_$MonthlySummaryImpl(
       incomeCents: null == incomeCents
@@ -184,6 +197,10 @@ class __$$MonthlySummaryImplCopyWithImpl<$Res>
           ? _value.isSavingsOnTarget
           : isSavingsOnTarget // ignore: cast_nullable_to_non_nullable
               as bool,
+      categoryCents: null == categoryCents
+          ? _value._categoryCents
+          : categoryCents // ignore: cast_nullable_to_non_nullable
+              as Map<TransactionCategory, int>,
     ));
   }
 }
@@ -199,7 +216,9 @@ class _$MonthlySummaryImpl implements _MonthlySummary {
       required this.dailyCostCents,
       required this.savedCents,
       required this.savingsPercent,
-      required this.isSavingsOnTarget});
+      required this.isSavingsOnTarget,
+      required final Map<TransactionCategory, int> categoryCents})
+      : _categoryCents = categoryCents;
 
   @override
   final int incomeCents;
@@ -217,10 +236,23 @@ class _$MonthlySummaryImpl implements _MonthlySummary {
   final double savingsPercent;
   @override
   final bool isSavingsOnTarget;
+// Mesma composição de custo de vida (saídas + gasto de cartão),
+// bucketada por categoria — soma dos valores bate com
+// costOfLivingCents (M7, #029).
+  final Map<TransactionCategory, int> _categoryCents;
+// Mesma composição de custo de vida (saídas + gasto de cartão),
+// bucketada por categoria — soma dos valores bate com
+// costOfLivingCents (M7, #029).
+  @override
+  Map<TransactionCategory, int> get categoryCents {
+    if (_categoryCents is EqualUnmodifiableMapView) return _categoryCents;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_categoryCents);
+  }
 
   @override
   String toString() {
-    return 'MonthlySummary(incomeCents: $incomeCents, expensesCents: $expensesCents, cardSpendCents: $cardSpendCents, costOfLivingCents: $costOfLivingCents, dailyCostCents: $dailyCostCents, savedCents: $savedCents, savingsPercent: $savingsPercent, isSavingsOnTarget: $isSavingsOnTarget)';
+    return 'MonthlySummary(incomeCents: $incomeCents, expensesCents: $expensesCents, cardSpendCents: $cardSpendCents, costOfLivingCents: $costOfLivingCents, dailyCostCents: $dailyCostCents, savedCents: $savedCents, savingsPercent: $savingsPercent, isSavingsOnTarget: $isSavingsOnTarget, categoryCents: $categoryCents)';
   }
 
   @override
@@ -243,7 +275,9 @@ class _$MonthlySummaryImpl implements _MonthlySummary {
             (identical(other.savingsPercent, savingsPercent) ||
                 other.savingsPercent == savingsPercent) &&
             (identical(other.isSavingsOnTarget, isSavingsOnTarget) ||
-                other.isSavingsOnTarget == isSavingsOnTarget));
+                other.isSavingsOnTarget == isSavingsOnTarget) &&
+            const DeepCollectionEquality()
+                .equals(other._categoryCents, _categoryCents));
   }
 
   @override
@@ -256,7 +290,8 @@ class _$MonthlySummaryImpl implements _MonthlySummary {
       dailyCostCents,
       savedCents,
       savingsPercent,
-      isSavingsOnTarget);
+      isSavingsOnTarget,
+      const DeepCollectionEquality().hash(_categoryCents));
 
   /// Create a copy of MonthlySummary
   /// with the given fields replaced by the non-null parameter values.
@@ -270,14 +305,16 @@ class _$MonthlySummaryImpl implements _MonthlySummary {
 
 abstract class _MonthlySummary implements MonthlySummary {
   const factory _MonthlySummary(
-      {required final int incomeCents,
-      required final int expensesCents,
-      required final int cardSpendCents,
-      required final int costOfLivingCents,
-      required final int dailyCostCents,
-      required final int savedCents,
-      required final double savingsPercent,
-      required final bool isSavingsOnTarget}) = _$MonthlySummaryImpl;
+          {required final int incomeCents,
+          required final int expensesCents,
+          required final int cardSpendCents,
+          required final int costOfLivingCents,
+          required final int dailyCostCents,
+          required final int savedCents,
+          required final double savingsPercent,
+          required final bool isSavingsOnTarget,
+          required final Map<TransactionCategory, int> categoryCents}) =
+      _$MonthlySummaryImpl;
 
   @override
   int get incomeCents;
@@ -294,7 +331,12 @@ abstract class _MonthlySummary implements MonthlySummary {
   @override
   double get savingsPercent;
   @override
-  bool get isSavingsOnTarget;
+  bool
+      get isSavingsOnTarget; // Mesma composição de custo de vida (saídas + gasto de cartão),
+// bucketada por categoria — soma dos valores bate com
+// costOfLivingCents (M7, #029).
+  @override
+  Map<TransactionCategory, int> get categoryCents;
 
   /// Create a copy of MonthlySummary
   /// with the given fields replaced by the non-null parameter values.

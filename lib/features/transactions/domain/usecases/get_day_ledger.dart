@@ -46,6 +46,7 @@ class GetDayLedger {
                 description: t.description,
                 amountCents: t.amountCents,
                 date: t.date,
+                category: t.category,
                 recurrenceRuleId: t.recurrenceRuleId,
                 createdAt: t.createdAt,
               ));
@@ -65,6 +66,7 @@ class GetDayLedger {
                 description: r.description,
                 amountCents: r.amountCents,
                 date: day,
+                category: r.category,
                 recurrenceRuleId: r.id,
               ));
 

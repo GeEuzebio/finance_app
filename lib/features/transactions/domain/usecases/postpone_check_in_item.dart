@@ -32,6 +32,7 @@ class PostponeCheckInItem {
         amountCents: item.amountCents,
         date: newDate,
         status: TransactionStatus.previsto,
+        category: item.category,
         originalTransactionId: original.id,
         createdAt: now,
         updatedAt: now,

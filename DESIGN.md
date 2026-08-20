@@ -84,37 +84,38 @@ dinheiro" (`PRODUCT.md`).
   Material (indicador âmbar automático via `ColorScheme.primary`); trocada
   por `AnimatedBottomNavigationBar` (ver bullet "Navegação animada"
   abaixo), com o âmbar aplicado manualmente por não herdar mais do tema.
-- **Linha de dia (projeção)**: formato planilha (M7, #020, reformulado no
-  #026) — 3 colunas fixas (Dia / Diferença / Saldo) com cabeçalho em
-  `labelSmall` mudo. Dia é compacto (número grande + dia da semana
-  abreviado embaixo, chip "HOJE" só no dia de hoje — âmbar continua o
-  único destaque de "agora"). Diferença é
-  `projectedCreditsCents - projectedDebitsCents` do próprio dia, colorida
-  (verde de crédito se positiva, vermelho de débito se negativa, "—" mudo
-  quando não há movimento — nunca "R$ 0,00"). Saldo usa um gradiente
-  contínuo entre vermelho e verde de débito/crédito (`Color.lerp`,
-  normalizado pelo maior `|saldo|` do mês em exibição) — pedido do
-  usuário inspirado na planilha do Breno, sinaliza de relance se o mês
-  tende a ficar "no vermelho" sem precisar ler cada valor. A linha inteira
-  é um `InkWell` com `chevron_right` mudo à direita — toca em qualquer
-  lugar do card pra abrir `DayDetailScreen`, mesmo idioma de navegação do
-  card de cartão (`projection_screen.dart`).
+- **Calendário de projeção** (M7, #020 → #026 → #028): grid de 7 colunas
+  (dom–sáb), hand-rolled — nenhum pacote de calendário de terceiro em
+  nenhum lugar do app, mesmo espírito do seletor de mês e do gradiente,
+  que já eram autorais. Cada célula tinge o fundo com o gradiente
+  contínuo verde→vermelho de débito/crédito (`_balanceColor`,
+  `Color.lerp` normalizado pelo maior `|saldo|` do mês em exibição —
+  pedido do usuário inspirado na planilha do Breno) em vez de escrever o
+  valor na célula (referência: Toshl/Zaim — o número aparece só no
+  painel de baixo, ao selecionar). Hoje ganha um anel âmbar; o dia
+  selecionado, preenchimento âmbar sólido com o número em `onAmber` —
+  dois estados visualmente distintos porque nem sempre coincidem.
+  Referência de interação: Organizze (app financeiro brasileiro mais
+  elogiado por interface limpa) — toca no dia, vê/lança movimento ali
+  mesmo, sem trocar de tela (`projection_screen.dart`).
 - **Seletor de mês/ano**: par de `IconButton` (chevron_left/right)
   ladeando o mês por extenso abreviado + ano de 2 dígitos ("Ago./26"),
-  centralizado logo abaixo do `AppBar` — troca os dois parâmetros do
-  provider de projeção, sem paginação nem calendário completo
+  centralizado logo abaixo do `AppBar`, funcionando como cabeçalho do
+  calendário — troca os dois parâmetros do provider de projeção, sem
+  paginação (`projection_screen.dart`).
+- **Painel de movimentação do dia**: embaixo do calendário, na mesma
+  tela (M7, #028 — antes era uma tela própria, `DayDetailScreen`, #026,
+  aberta por navegação; o pedido agora é ver tudo junto) — título com a
+  data por extenso, banner "Diferença do dia" (mesma pílula colorida do
+  banner de fatura comprometida), lista de itens com ícone discriminando
+  entrada (seta verde) / saída (seta vermelha) e categoria
+  (ícone + rótulo mudo) — sem os botões de ação do card de check-in,
+  porque aqui é consulta, não uma fila de decisão
   (`projection_screen.dart`).
-- **Detalhamento do dia**: tela própria (`DayDetailScreen`) aberta ao
-  tocar num dia da Projeção — banner de "Diferença do dia" no topo (mesma
-  pílula colorida do banner de fatura comprometida) seguido da lista de
-  itens, cada um um card com descrição + conta à esquerda, valor colorido
-  à direita — sem os botões de ação do card de check-in, porque aqui é
-  consulta, não uma fila de decisão (`day_detail_screen.dart`).
 - **Botão de adicionar movimento**: `FloatingActionButton` (ícone `+`,
   âmbar do tema) na Projeção — abre o mesmo diálogo de lançamento avulso
-  do #018, com um campo de data editável (`showDatePicker`), pra lançar
-  em qualquer dia sem precisar já estar olhando pra ele
-  (`projection_screen.dart`).
+  do #018, lançando direto no dia selecionado no calendário (sem campo
+  de data no diálogo — o calendário já escolheu) (`projection_screen.dart`).
 - **Destaque de risco**: dia com saldo previsto negativo ganha tingimento
   sutil (vermelho de débito a 8% de opacidade no fundo do card) + ícone de
   alerta — é o sinal de "análise de risco" que veio da conversa sobre
@@ -147,11 +148,12 @@ dinheiro" (`PRODUCT.md`).
   fatura" full-width — some quando a fatura já está paga, porque uma
   ação indisponível não deve aparecer desabilitada e sim não aparecer
   (`card_detail_screen.dart`).
-- **Item de fatura**: descrição + "Parcela X/Y" (só quando há mais de 1
-  parcela — parcela única não precisa desse rótulo) à esquerda, valor
-  tabular à direita, ícone de estornar (`Icons.undo`) discreto — estorno
-  é ação secundária de correção, não de fluxo principal, por isso não
-  ganha peso de botão cheio como "Pagar fatura" ganha.
+- **Item de fatura**: descrição + categoria (ícone + rótulo, M7 #029) +
+  "Parcela X/Y" (só quando há mais de 1 parcela — parcela única não
+  precisa desse rótulo) à esquerda, valor tabular à direita, ícone de
+  estornar (`Icons.undo`) discreto — estorno é ação secundária de
+  correção, não de fluxo principal, por isso não ganha peso de botão
+  cheio como "Pagar fatura" ganha.
 - **Card de reserva**: nome à esquerda, valor à direita — `atual / meta`
   em números tabulares quando há meta definida, só `atual` quando não há
   (uma reserva sem meta não devia mostrar uma fração vazia). Barra de
@@ -160,8 +162,11 @@ dinheiro" (`PRODUCT.md`).
   porque "meta com prazo visual" é um conceito que não existe em conta,
   fatura ou check-in. Linha de 3 `IconButton`s (excluir em vermelho de
   débito, resgatar, aportar) — sem botão cheio aqui, porque nenhuma das
-  três é o caminho feliz único como "Confirmar" é no check-in
-  (`reserves_screen.dart`).
+  três é o caminho feliz único como "Confirmar" é no check-in. Diálogo de
+  nova reserva ganhou 2 `ActionChip`s de sugestão de meta ("3x custo de
+  vida" / "6x", M7 #030) logo abaixo do campo Meta, só quando há dado do
+  mês pra sugerir — tocar preenche o campo, não substitui a digitação
+  manual (`reserves_screen.dart`).
 - **Estados vazio/erro compartilhados**: `EmptyStateView`/`ErrorStateView`
   (`lib/core/widgets/state_views.dart`) — mesmo padrão (ícone mudo +
   título + frase; ícone de alerta em cor de débito + mensagem) que antes
@@ -174,7 +179,12 @@ dinheiro" (`PRODUCT.md`).
   `SegmentedButton` de 3 opções (Avulso/Fixa/Variável) que revela os
   campos de recorrência (frequência, intervalo, fim opcional) só quando
   não é avulso — mesmo princípio de "esconder o que não se aplica" do
-  resto do app. Dropdown "Entrada/Saída" decide o sinal do valor digitado
+  resto do app. Dropdown "Entrada/Saída" decide o sinal do valor digitado;
+  dropdown de Categoria (M7, #029) logo abaixo, mesmo componente e rótulos
+  compartilhados (`categoryLabel`/`categoryIcon`,
+  `core/utils/transaction_category.dart`) usados no diálogo de novo
+  movimento da Projeção e no de nova compra do Cartão — um só lugar
+  define o nome/ícone de cada categoria, os 3 diálogos só desenham
   (`lancamentos_screen.dart`).
 - **Configurações**: seções em `ListView` simples, sem card por seção —
   primeira tela do app que é uma lista de controles, não uma lista de
@@ -190,7 +200,11 @@ dinheiro" (`PRODUCT.md`).
   lembrete está ligado (esconder o que não se aplica, mesmo princípio do
   diálogo de Lançamentos) e abre o `showTimePicker` nativo; `ListTile`
   com `chevron_right` pra navegar a Cartões/Reservas, que saíram da
-  bottom nav e agora só se chega por aqui (`settings_screen.dart`).
+  bottom nav e agora só se chega por aqui; `SwitchListTile` pra "Sugestões
+  por IA" (M7, #031) — desligado por padrão, subtítulo explica o que sai
+  do app (resumo agregado, sem lançamento individual) antes mesmo de
+  ligar, mesmo princípio de consentimento informado que já rege o pedido
+  de permissão de notificação (`settings_screen.dart`).
 - **Mês**: 3 `Card`s empilhados — Performance (5 linhas: Entradas,
   Saídas, Custo diário, Economizado, Gastos com cartão — entradas e
   economizado em verde de crédito, o resto em vermelho de débito, mesmo
@@ -202,8 +216,25 @@ dinheiro" (`PRODUCT.md`).
   valor) e o valor economizado em destaque (`headlineSmall`); Custo de
   vida com as 3 parcelas + `Divider` + Total em negrito — o total nunca é
   a soma literal das 3 linhas (custo diário é uma taxa, não uma parcela),
-  então o divisor deixa claro que o Total é outra conta, não um subtotal
-  (`month_screen.dart`).
+  então o divisor deixa claro que o Total é outra conta, não um subtotal;
+  "Gastos por categoria" (M7, #029) — lista ordenada decrescente por
+  valor, ícone + rótulo da categoria à esquerda, barra fina de % (débito,
+  sem cor de julgamento — aqui é só magnitude) + valor à direita; Guia
+  50/30/20 (M7, #030) — 3 linhas (Necessidades/Desejos/Reserva), cada uma
+  com meta e % real lado a lado e barra colorida por bucket (verde quando
+  dentro da meta, vermelho quando fora — "dentro" inverte de sentido pra
+  Reserva: mais é melhor, diferente de Necessidades/Desejos); card
+  condicional de fatura atrasada (M7, #030) — só existe quando há
+  rotativo de verdade (fatura vencida e não paga, diferente do banner de
+  "comprometido" que já existia na Projeção), ícone de alerta na cor de
+  débito, mesmo princípio de "esconder o que não se aplica" do resto do
+  app; card de Sugestões da IA (M7, #031) — desligado, um `Card` mudo
+  convida a ativar em Configurações (ícone + texto curto, sem botão
+  desabilitado, que sinalizaria uma ação disponível que não é); ligado,
+  botão "Gerar sugestões"/"Atualizar" (`TextButton`, ação secundária — a
+  tela não gira em torno da IA), bullets das sugestões abaixo e uma linha
+  `labelSmall` mutada avisando o que foi compartilhado, sempre visível,
+  não só na primeira geração (`month_screen.dart`).
 - **Importar extrato**: tela de um passo só — dropdown de conta, botão de
   selecionar arquivo (`OutlinedButton`, âmbar — ação secundária em
   relação ao fluxo normal do app, mas primária nesta tela isolada, mesmo

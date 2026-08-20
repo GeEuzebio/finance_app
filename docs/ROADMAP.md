@@ -442,6 +442,166 @@ testes existentes — a engine continua recebendo exatamente a mesma forma
 de dado (`List<Account>`), só que sempre com 1 item. Nenhuma migração
 precisou ser escrita. Status: concluído.
 
+### #028 — Projeção em calendário
+Pedido do usuário: trocar a lista de linhas por dia por um calendário —
+seleciona a data, a movimentação (entradas/saídas discriminadas) aparece
+embaixo, na mesma tela, sem navegar pra outra.
+
+Zero mudança de dado — `monthlyProjectionProvider`/`dayLedgerProvider`
+(#026) já entregavam tudo, é troca de camada de apresentação:
+
+- `projection_screen.dart` reescrita: `_MonthCalendar` (grid de 7
+  colunas, hand-rolled — nenhum pacote de calendário de terceiro em
+  nenhum lugar do app, mesmo padrão do seletor de mês/gradiente
+  já existentes) substitui a lista de `_DayRow`. Cada célula tinge o
+  fundo com `_balanceColor` (reusada sem mudança), anel âmbar em hoje,
+  preenchimento âmbar no dia selecionado. Referência: Toshl/Zaim (célula
+  colorida, sem valor cravado — o valor mora no painel de baixo).
+- Painel de movimentação embaixo do grid absorve o que era
+  `DayDetailScreen` (deletada) direto na tela — banner "Diferença do
+  dia" + lista de itens, agora com ícone discriminando entrada (seta
+  verde) / saída (seta vermelha). Referência: Organizze (calendário
+  brasileiro mais elogiado por interface limpa — toca no dia, lança/vê
+  movimento).
+- FAB usa o dia selecionado direto, sem `showDatePicker` no diálogo (o
+  calendário já é o seletor de data).
+
+Status: concluído.
+
+### #029 — Categorização de lançamentos
+Ao pesquisar referências pro #028, o usuário decidiu ampliar o escopo:
+"pra onde vai meu dinheiro" virou uma pergunta que a previsibilidade
+sozinha não respondia (ajuste registrado em `PRODUCT.md`, não é reversão
+da tese central do app).
+
+- Novo `lib/core/utils/transaction_category.dart`: enum
+  `TransactionCategory` (moradia/alimentacao/transporte/lazer/saude/
+  outros — por **propósito** do gasto, não por meio de pagamento; cartão
+  não é categoria) + label/ícone compartilhados entre todos os diálogos.
+- Migração `supabase/migrations/0004_category.sql`: coluna `category
+  text not null default 'outros'` em `transactions`, `recurrence_rules`
+  e `invoice_items` — mesmo padrão de `is_variable` (#018), sem quebrar
+  linha existente. ⚠️ Precisa ser aplicada manualmente no SQL Editor do
+  Supabase antes de funcionar contra dado real (mesma limitação das
+  migrações 0002/0003 — Claude não tem acesso de DDL).
+- `Transaction`, `RecurrenceRule`, `InvoiceItem`, `CheckInItem` ganham
+  `category` (default `outros`); `RegisterCardPurchase` ganha o
+  parâmetro. Dropdown de categoria nos diálogos de novo lançamento
+  (`lancamentos_screen.dart`), novo movimento (`projection_screen.dart`)
+  e nova compra de cartão (`card_detail_screen.dart`).
+- `summarizeMonth` (`monthly_summary.dart`) ganha `categoryCents` — mesma
+  iteração que já compõe `costOfLivingCents` (saídas de conta + gasto de
+  cartão, excluindo pagamento de fatura), só bucketada por categoria em
+  vez de somada num total; a soma dos valores bate com
+  `costOfLivingCents` (testado). Novo card "Gastos por categoria" na aba
+  Mês (`month_screen.dart`), ordenado decrescente, barra de % por linha.
+
+Status: concluído no código; migração pendente de aplicação manual.
+
+### #030 — Guia 50/30/20, plano de quitação de fatura atrasada e meta de reserva sugerida
+Três estratégias de educação financeira escolhidas pelo usuário (dentre
+opções levantadas com pesquisa web) pra ajudar a "ficar no azul e deixar
+de depender do cartão de crédito" — motivação original do produto.
+
+- **Guia 50/30/20**: `budget503020(MonthlySummary)`
+  (`monthly_summary.dart`) — necessidades (moradia/alimentação/
+  transporte/saúde) e desejos (o resto de `categoryCents`, por
+  subtração, não por um segundo conjunto explícito) vêm da categorização
+  do #029; reserva reusa `savedCents`/`savingsPercent` já calculados
+  (⚠️ mesma limitação do #021: sobra do mês, não aporte real em
+  `Reserve`, que não tem ledger). Card novo na aba Mês, 3 linhas com
+  barra comparando % real à meta.
+- **Plano de quitação de fatura atrasada**: novo
+  `GetOverdueCardDebt` (`credit_cards/domain/usecases/`) — mesmo padrão
+  de `GetCommittedCardBalance` (#024), mas soma só fatura com `dueDate`
+  **no passado** e não paga (rotativo de verdade, não só "em aberto").
+  Card condicional na aba Mês (só aparece com dívida atrasada): valor
+  atrasado ÷ 3 meses (horizonte fixo, ponytail: MVP) = quanto pagar a
+  mais por mês pra zerar.
+- **Meta de reserva sugerida**: diálogo de nova reserva
+  (`reserves_screen.dart`) ganha 2 chips ("3x custo de vida" / "6x") que
+  preenchem o campo Meta ao tocar, usando `monthlySummaryProvider` já
+  existente — sem use case novo.
+
+Status: concluído.
+
+### #031 — Sugestões de IA sobre gastos (opt-in, sob demanda)
+Pedido do usuário: avaliar integrar um modelo de IA que analise entradas/
+gastos e sugira redução de despesa e melhora de economia, com pesquisa de
+estudos/artigos de apoio. Decisão registrada em `docs/adr/0007-ai-insights.md`
+(distinção explícita da ADR 0006, que rejeitou acesso automático de
+terceiro a dado bancário bruto — isto é sob comando explícito do usuário
+e só dado agregado).
+
+- **Edge Function** `supabase/functions/financial-insights/index.ts`
+  (Deno) — recebe o resumo agregado do mês, chama a API da Anthropic
+  (`claude-haiku-4-5`) com prompt que proíbe recalcular qualquer valor
+  (mesmo princípio de "confiança em dinheiro" do resto do app), devolve
+  3 sugestões em português como array JSON. `ANTHROPIC_API_KEY` como
+  secret do Supabase, nunca no client. ⚠️ Precisa ser deployada
+  manualmente (`supabase functions deploy financial-insights` +
+  `supabase secrets set ANTHROPIC_API_KEY=...`) — Claude não tem acesso
+  de deploy, mesma categoria das migrações pendentes.
+- **`lib/features/insights/`** (domain/data/presentation): `FinancialInsights`
+  (entity), `InsightsRepository`/`InsightsRepositoryImpl` (chama
+  `supabase.functions.invoke`, guardDatabase), `GenerateFinancialInsights`
+  (use case), `InsightsController` (Riverpod, estado só em memória —
+  ponytail: sem tabela de cache, MVP). Payload: `categoryCents` (rótulo
+  via `categoryLabel`, sem descrição de lançamento), saída de
+  `budget503020`, `savedCents`/`savingsPercent`, dívida atrasada de
+  `GetOverdueCardDebt` — tudo já calculado, nada recomputado.
+- **Opt-in em Configurações**: `SwitchListTile` "Sugestões por IA"
+  (mesmo padrão do toggle de notificações do #022), desligado por
+  padrão. Card novo na aba Mês só oferece o botão "Gerar sugestões"
+  quando ligado; desligado, mostra convite mudo pra ativar.
+
+Status: concluído no código; deploy da Edge Function pendente (manual).
+
+### #032 — Lembretes por WhatsApp (Evolution API)
+Pedido do usuário: lembretes por WhatsApp de contas a vencer, pagamento
+de fatura de cartão e um relatório periódico da situação financeira do
+casal, via Evolution API (gateway self-hosted de WhatsApp). Decisão
+registrada em `docs/adr/0008-whatsapp-reminders.md` — diferente da 0006/
+0007, aqui não há terceiro recebendo dado: a Evolution API é hospedada
+pelo próprio usuário e o destino é o próprio WhatsApp do casal, então
+não há toggle de opt-in novo (o deploy manual já é o gate).
+
+- **Edge Function** `supabase/functions/whatsapp-reminders/index.ts`
+  (Deno), disparada 1x/dia via `pg_cron`. Porta uma versão de
+  `expandRecurrence` (`recurrence_expansion.dart`) pro TypeScript —
+  segunda implementação da mesma regra de data, assumida
+  conscientemente (comentário aponta o arquivo Dart como fonte da
+  verdade). Dois blocos:
+  - **Contas a vencer** (todo dia): junta lançamentos avulsos
+    `previsto`, ocorrências de `recurrence_rules` que caem exatamente
+    `ADVANCE_NOTICE_DAYS` (3) dias à frente, e faturas de cartão não
+    pagas vencendo nesse dia — dispara 1 mensagem só se achar algo.
+    Idempotente por checar o dia exato, não uma janela (limitação:
+    falha do cron nesse dia perde o lembrete, sem reenvio).
+  - **Relatório semanal** (só segundas): versão enxuta de
+    `summarizeMonth` (sem quebra por categoria, evita depender da
+    migração 0004) — entradas, saídas, economia e fatura atrasada do
+    mês corrente.
+  - Envio via `POST {EVOLUTION_API_URL}/message/sendText/{EVOLUTION_INSTANCE}`
+    (header `apikey`), pra cada número em
+    `WHATSAPP_PHONE_1`/`WHATSAPP_PHONE_2`.
+- **Migração** `supabase/migrations/0005_whatsapp_reminders.sql`:
+  habilita `pg_cron`/`pg_net` e agenda a chamada diária via
+  `net.http_post` (placeholders de project ref/anon key — nenhum dos
+  dois é segredo — a preencher antes de rodar).
+- **Zero mudança em `lib/`** — números de WhatsApp e credenciais da
+  Evolution API são só secrets do Supabase, sem tela nova.
+
+⚠️ **Você precisa fazer manualmente**: hospedar uma instância Evolution
+API e parear o WhatsApp via QR code; `supabase functions deploy
+whatsapp-reminders`; `supabase secrets set EVOLUTION_API_URL=...
+EVOLUTION_API_KEY=... EVOLUTION_INSTANCE=... WHATSAPP_PHONE_1=...
+WHATSAPP_PHONE_2=...`; editar os placeholders e rodar a migração 0005 no
+SQL Editor.
+
+Status: concluído no código; deploy da Evolution API + Edge Function +
+migração pendente (manual).
+
 ## Backlog (fora da ordem atual — decisões já tomadas, implementação adiada)
 
 Discutido e decidido em sessão, mas propositalmente adiado até M0–M6

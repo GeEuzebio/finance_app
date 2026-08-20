@@ -120,7 +120,7 @@ final creditCardsControllerProvider = AutoDisposeAsyncNotifierProvider<
 
 typedef _$CreditCardsController = AutoDisposeAsyncNotifier<List<CreditCard>>;
 String _$cardDetailControllerHash() =>
-    r'9dff10744f0ecf047628489ed6ee0451e61975c1';
+    r'5844cd4db4c72a994d1634ae462aaa63acfe2324';
 
 /// Copied from Dart SDK
 class _SystemHash {

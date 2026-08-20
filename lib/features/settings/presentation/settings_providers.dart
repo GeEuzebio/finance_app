@@ -14,6 +14,7 @@ const _keyProjectionHorizonDays = 'settings.projection_horizon_days';
 const _keySavingsTargetPercent = 'settings.savings_target_percent';
 const _keyCheckInReminderEnabled = 'settings.checkin_reminder_enabled';
 const _keyCheckInReminderMinutes = 'settings.checkin_reminder_minutes';
+const _keyAiInsightsEnabled = 'settings.ai_insights_enabled';
 
 @riverpod
 Future<SharedPreferences> sharedPreferences(Ref ref) => SharedPreferences.getInstance();
@@ -34,6 +35,7 @@ class SettingsController extends _$SettingsController {
       savingsTargetPercent: prefs.getInt(_keySavingsTargetPercent) ?? 20,
       checkInReminderEnabled: prefs.getBool(_keyCheckInReminderEnabled) ?? false,
       checkInReminderMinutes: prefs.getInt(_keyCheckInReminderMinutes) ?? 1200,
+      aiInsightsEnabled: prefs.getBool(_keyAiInsightsEnabled) ?? false,
     );
   }
 
@@ -87,5 +89,13 @@ class SettingsController extends _$SettingsController {
       ),
     );
     return true;
+  }
+
+  Future<void> setAiInsightsEnabled(bool enabled) async {
+    final prefs = await ref.read(sharedPreferencesProvider.future);
+    await prefs.setBool(_keyAiInsightsEnabled, enabled);
+    state = AsyncData(
+      (state.valueOrNull ?? const AppSettings()).copyWith(aiInsightsEnabled: enabled),
+    );
   }
 }

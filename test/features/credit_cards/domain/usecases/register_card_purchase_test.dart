@@ -1,5 +1,6 @@
 import 'package:finance_app/core/errors/failure.dart';
 import 'package:finance_app/core/utils/date_only.dart';
+import 'package:finance_app/core/utils/transaction_category.dart';
 import 'package:finance_app/features/accounts/domain/entities/account.dart' show AccountOwner;
 import 'package:finance_app/features/credit_cards/domain/entities/credit_card.dart';
 import 'package:finance_app/features/credit_cards/domain/entities/invoice.dart';
@@ -81,6 +82,7 @@ void main() {
       totalAmountCents: -10000,
       purchaseDate: DateOnly(2026, 5, 1),
       installments: 3,
+      category: TransactionCategory.outros,
     );
 
     expect(result.isRight(), isTrue);
@@ -103,6 +105,7 @@ void main() {
       totalAmountCents: -5000,
       purchaseDate: DateOnly(2026, 5, 1),
       installments: 1,
+      category: TransactionCategory.outros,
     );
 
     final captured =
@@ -119,6 +122,7 @@ void main() {
       totalAmountCents: -1000,
       purchaseDate: DateOnly(2026, 5, 1),
       installments: 0,
+      category: TransactionCategory.outros,
     );
 
     result.match((l) => expect(l, isA<ValidationFailure>()), (r) => fail('esperava Left'));

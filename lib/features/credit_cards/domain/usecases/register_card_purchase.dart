@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/guard_database.dart';
 import '../../../../core/utils/date_only.dart';
+import '../../../../core/utils/transaction_category.dart';
 import '../../../cashflow_engine/domain/installment_distribution.dart';
 import '../entities/invoice_item.dart';
 import '../repositories/credit_card_repository.dart';
@@ -25,6 +26,7 @@ class RegisterCardPurchase {
     required int totalAmountCents,
     required DateOnly purchaseDate,
     required int installments,
+    required TransactionCategory category,
   }) {
     return guardDatabase(() async {
       if (installments < 1) {
@@ -49,6 +51,7 @@ class RegisterCardPurchase {
           installmentNumber: i + 1,
           installmentTotal: installments,
           purchaseGroupId: purchaseGroupId,
+          category: category,
           createdAt: DateTime.now(),
         );
         await _unwrap(_repository.upsertItem(item));

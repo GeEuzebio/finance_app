@@ -1,4 +1,5 @@
 import 'package:finance_app/core/utils/date_only.dart';
+import 'package:finance_app/core/utils/transaction_category.dart';
 import 'package:finance_app/features/accounts/domain/entities/account.dart' show AccountOwner;
 import 'package:finance_app/features/credit_cards/data/repositories/credit_card_repository_impl.dart';
 import 'package:finance_app/features/credit_cards/domain/entities/credit_card.dart';
@@ -46,9 +47,12 @@ void main() {
       installmentNumber: 1,
       installmentTotal: 3,
       purchaseGroupId: 'g1',
+      category: TransactionCategory.transporte,
       createdAt: DateTime.utc(2026, 1, 1),
     );
 
-    expect(invoiceItemFromJson(invoiceItemToJson(item)), item);
+    final json = invoiceItemToJson(item);
+    expect(json['category'], 'transporte');
+    expect(invoiceItemFromJson(json), item);
   });
 }

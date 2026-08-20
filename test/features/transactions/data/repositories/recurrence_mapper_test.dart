@@ -1,4 +1,5 @@
 import 'package:finance_app/core/utils/date_only.dart';
+import 'package:finance_app/core/utils/transaction_category.dart';
 import 'package:finance_app/features/transactions/data/repositories/recurrence_repository_impl.dart';
 import 'package:finance_app/features/transactions/domain/entities/recurrence_rule.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,9 +33,12 @@ void main() {
       startDate: DateOnly(2026, 1, 5),
       endDate: DateOnly(2026, 12, 5),
       occurrenceCount: null,
+      category: TransactionCategory.lazer,
       createdAt: DateTime.utc(2026, 1, 1),
     );
 
-    expect(recurrenceRuleFromJson(recurrenceRuleToJson(rule)), rule);
+    final json = recurrenceRuleToJson(rule);
+    expect(json['category'], 'lazer');
+    expect(recurrenceRuleFromJson(json), rule);
   });
 }

@@ -122,6 +122,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+              const _SectionHeader('IA'),
+              Card(
+                child: SwitchListTile(
+                  secondary: const Icon(Icons.auto_awesome_outlined),
+                  title: const Text('Sugestões por IA'),
+                  subtitle: const Text(
+                    'Envia um resumo agregado dos seus gastos (sem lançamento '
+                    'individual) pra Anthropic gerar sugestões, só quando você pedir.',
+                  ),
+                  value: settings.aiInsightsEnabled,
+                  onChanged: (value) =>
+                      ref.read(settingsControllerProvider.notifier).setAiInsightsEnabled(value),
+                ),
+              ),
+              const SizedBox(height: 24),
               const _SectionHeader('Cartões e reservas'),
               Card(
                 child: Column(

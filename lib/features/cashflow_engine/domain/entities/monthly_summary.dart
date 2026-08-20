@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../core/utils/transaction_category.dart';
+
 part 'monthly_summary.freezed.dart';
 
 /// Resumo de um mês — Performance/Economia/Custo de vida (M7, #021).
@@ -17,5 +19,9 @@ class MonthlySummary with _$MonthlySummary {
     required int savedCents,
     required double savingsPercent,
     required bool isSavingsOnTarget,
+    // Mesma composição de custo de vida (saídas + gasto de cartão),
+    // bucketada por categoria — soma dos valores bate com
+    // costOfLivingCents (M7, #029).
+    required Map<TransactionCategory, int> categoryCents,
   }) = _MonthlySummary;
 }

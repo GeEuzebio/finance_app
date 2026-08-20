@@ -23,6 +23,7 @@ mixin _$AppSettings {
       throw _privateConstructorUsedError; // Minutos desde meia-noite — evita lidar com serialização de
 // TimeOfDay; 1200 = 20:00.
   int get checkInReminderMinutes => throw _privateConstructorUsedError;
+  bool get aiInsightsEnabled => throw _privateConstructorUsedError;
 
   /// Create a copy of AppSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -42,7 +43,8 @@ abstract class $AppSettingsCopyWith<$Res> {
       int projectionHorizonDays,
       int savingsTargetPercent,
       bool checkInReminderEnabled,
-      int checkInReminderMinutes});
+      int checkInReminderMinutes,
+      bool aiInsightsEnabled});
 }
 
 /// @nodoc
@@ -65,6 +67,7 @@ class _$AppSettingsCopyWithImpl<$Res, $Val extends AppSettings>
     Object? savingsTargetPercent = null,
     Object? checkInReminderEnabled = null,
     Object? checkInReminderMinutes = null,
+    Object? aiInsightsEnabled = null,
   }) {
     return _then(_value.copyWith(
       themeMode: null == themeMode
@@ -87,6 +90,10 @@ class _$AppSettingsCopyWithImpl<$Res, $Val extends AppSettings>
           ? _value.checkInReminderMinutes
           : checkInReminderMinutes // ignore: cast_nullable_to_non_nullable
               as int,
+      aiInsightsEnabled: null == aiInsightsEnabled
+          ? _value.aiInsightsEnabled
+          : aiInsightsEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -104,7 +111,8 @@ abstract class _$$AppSettingsImplCopyWith<$Res>
       int projectionHorizonDays,
       int savingsTargetPercent,
       bool checkInReminderEnabled,
-      int checkInReminderMinutes});
+      int checkInReminderMinutes,
+      bool aiInsightsEnabled});
 }
 
 /// @nodoc
@@ -125,6 +133,7 @@ class __$$AppSettingsImplCopyWithImpl<$Res>
     Object? savingsTargetPercent = null,
     Object? checkInReminderEnabled = null,
     Object? checkInReminderMinutes = null,
+    Object? aiInsightsEnabled = null,
   }) {
     return _then(_$AppSettingsImpl(
       themeMode: null == themeMode
@@ -147,6 +156,10 @@ class __$$AppSettingsImplCopyWithImpl<$Res>
           ? _value.checkInReminderMinutes
           : checkInReminderMinutes // ignore: cast_nullable_to_non_nullable
               as int,
+      aiInsightsEnabled: null == aiInsightsEnabled
+          ? _value.aiInsightsEnabled
+          : aiInsightsEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -159,7 +172,8 @@ class _$AppSettingsImpl implements _AppSettings {
       this.projectionHorizonDays = 30,
       this.savingsTargetPercent = 20,
       this.checkInReminderEnabled = false,
-      this.checkInReminderMinutes = 1200});
+      this.checkInReminderMinutes = 1200,
+      this.aiInsightsEnabled = false});
 
   @override
   @JsonKey()
@@ -178,10 +192,13 @@ class _$AppSettingsImpl implements _AppSettings {
   @override
   @JsonKey()
   final int checkInReminderMinutes;
+  @override
+  @JsonKey()
+  final bool aiInsightsEnabled;
 
   @override
   String toString() {
-    return 'AppSettings(themeMode: $themeMode, projectionHorizonDays: $projectionHorizonDays, savingsTargetPercent: $savingsTargetPercent, checkInReminderEnabled: $checkInReminderEnabled, checkInReminderMinutes: $checkInReminderMinutes)';
+    return 'AppSettings(themeMode: $themeMode, projectionHorizonDays: $projectionHorizonDays, savingsTargetPercent: $savingsTargetPercent, checkInReminderEnabled: $checkInReminderEnabled, checkInReminderMinutes: $checkInReminderMinutes, aiInsightsEnabled: $aiInsightsEnabled)';
   }
 
   @override
@@ -198,12 +215,20 @@ class _$AppSettingsImpl implements _AppSettings {
             (identical(other.checkInReminderEnabled, checkInReminderEnabled) ||
                 other.checkInReminderEnabled == checkInReminderEnabled) &&
             (identical(other.checkInReminderMinutes, checkInReminderMinutes) ||
-                other.checkInReminderMinutes == checkInReminderMinutes));
+                other.checkInReminderMinutes == checkInReminderMinutes) &&
+            (identical(other.aiInsightsEnabled, aiInsightsEnabled) ||
+                other.aiInsightsEnabled == aiInsightsEnabled));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, themeMode, projectionHorizonDays,
-      savingsTargetPercent, checkInReminderEnabled, checkInReminderMinutes);
+  int get hashCode => Object.hash(
+      runtimeType,
+      themeMode,
+      projectionHorizonDays,
+      savingsTargetPercent,
+      checkInReminderEnabled,
+      checkInReminderMinutes,
+      aiInsightsEnabled);
 
   /// Create a copy of AppSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -220,7 +245,8 @@ abstract class _AppSettings implements AppSettings {
       final int projectionHorizonDays,
       final int savingsTargetPercent,
       final bool checkInReminderEnabled,
-      final int checkInReminderMinutes}) = _$AppSettingsImpl;
+      final int checkInReminderMinutes,
+      final bool aiInsightsEnabled}) = _$AppSettingsImpl;
 
   @override
   ThemeMode get themeMode;
@@ -234,6 +260,8 @@ abstract class _AppSettings implements AppSettings {
 // TimeOfDay; 1200 = 20:00.
   @override
   int get checkInReminderMinutes;
+  @override
+  bool get aiInsightsEnabled;
 
   /// Create a copy of AppSettings
   /// with the given fields replaced by the non-null parameter values.

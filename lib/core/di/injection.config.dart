@@ -26,6 +26,8 @@ import 'package:finance_app/features/credit_cards/domain/usecases/find_or_create
     as _i485;
 import 'package:finance_app/features/credit_cards/domain/usecases/get_committed_card_balance.dart'
     as _i659;
+import 'package:finance_app/features/credit_cards/domain/usecases/get_overdue_card_debt.dart'
+    as _i849;
 import 'package:finance_app/features/credit_cards/domain/usecases/import_invoice_items.dart'
     as _i871;
 import 'package:finance_app/features/credit_cards/domain/usecases/pay_invoice.dart'
@@ -36,6 +38,12 @@ import 'package:finance_app/features/credit_cards/domain/usecases/reverse_invoic
     as _i53;
 import 'package:finance_app/features/imports/domain/usecases/import_transactions.dart'
     as _i792;
+import 'package:finance_app/features/insights/data/repositories/insights_repository_impl.dart'
+    as _i933;
+import 'package:finance_app/features/insights/domain/repositories/insights_repository.dart'
+    as _i319;
+import 'package:finance_app/features/insights/domain/usecases/generate_financial_insights.dart'
+    as _i265;
 import 'package:finance_app/features/notifications/notification_service.dart'
     as _i551;
 import 'package:finance_app/features/reserves/data/repositories/reserve_repository_impl.dart'
@@ -123,6 +131,10 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i12.RecurrenceRepository>(),
           gh<_i947.CreditCardRepository>(),
         ));
+    gh.lazySingleton<_i319.InsightsRepository>(
+        () => _i933.InsightsRepositoryImpl(gh<_i454.SupabaseClient>()));
+    gh.factory<_i265.GenerateFinancialInsights>(
+        () => _i265.GenerateFinancialInsights(gh<_i319.InsightsRepository>()));
     gh.factory<_i792.ImportTransactions>(
         () => _i792.ImportTransactions(gh<_i958.TransactionRepository>()));
     gh.factory<_i117.CreateTransaction>(
@@ -168,6 +180,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i659.GetCommittedCardBalance(gh<_i947.CreditCardRepository>()));
     gh.factory<_i485.FindOrCreateInvoice>(
         () => _i485.FindOrCreateInvoice(gh<_i947.CreditCardRepository>()));
+    gh.factory<_i849.GetOverdueCardDebt>(
+        () => _i849.GetOverdueCardDebt(gh<_i947.CreditCardRepository>()));
     gh.factory<_i871.ImportInvoiceItems>(() => _i871.ImportInvoiceItems(
           gh<_i947.CreditCardRepository>(),
           gh<_i485.FindOrCreateInvoice>(),

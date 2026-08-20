@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/guard_database.dart';
 import '../../../../core/utils/date_only.dart';
+import '../../../../core/utils/transaction_category.dart';
 import '../../domain/entities/recurrence_rule.dart';
 import '../../domain/repositories/recurrence_repository.dart';
 
@@ -63,6 +64,7 @@ RecurrenceRule recurrenceRuleFromJson(Map<String, dynamic> row) => RecurrenceRul
           : DateOnly.fromDateTime(DateTime.parse(row['end_date'] as String)),
       occurrenceCount: row['occurrence_count'] as int?,
       isVariable: row['is_variable'] as bool? ?? false,
+      category: TransactionCategory.values.byName(row['category'] as String),
       createdAt: DateTime.parse(row['created_at'] as String),
     );
 
@@ -77,5 +79,6 @@ Map<String, dynamic> recurrenceRuleToJson(RecurrenceRule rule) => {
       'end_date': rule.endDate?.toDateTime().toIso8601String().split('T').first,
       'occurrence_count': rule.occurrenceCount,
       'is_variable': rule.isVariable,
+      'category': rule.category.name,
       'created_at': rule.createdAt.toIso8601String(),
     };

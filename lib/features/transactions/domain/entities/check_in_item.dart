@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/utils/date_only.dart';
+import '../../../../core/utils/transaction_category.dart';
 
 part 'check_in_item.freezed.dart';
 
@@ -19,6 +20,7 @@ class CheckInItem with _$CheckInItem {
     required String description,
     required int amountCents,
     required DateOnly date,
+    @Default(TransactionCategory.outros) TransactionCategory category,
     String? recurrenceRuleId,
     // null pra item ainda virtual — materializar usa DateTime.now() nesse
     // caso; preservado ao reeditar um item já materializado, pra não

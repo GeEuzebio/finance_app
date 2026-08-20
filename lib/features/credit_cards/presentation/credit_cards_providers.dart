@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/errors/failure.dart';
 import '../../../core/utils/date_only.dart';
+import '../../../core/utils/transaction_category.dart';
 import '../../cashflow_engine/presentation/projection_providers.dart';
 import '../domain/entities/credit_card.dart';
 import '../domain/entities/invoice.dart';
@@ -73,6 +74,7 @@ class CardDetailController extends _$CardDetailController {
     required int amountCents,
     required DateOnly purchaseDate,
     required int installments,
+    required TransactionCategory category,
   }) =>
       _run(() => ref.read(registerCardPurchaseUseCaseProvider).call(
             creditCardId: cardId,
@@ -80,6 +82,7 @@ class CardDetailController extends _$CardDetailController {
             totalAmountCents: amountCents,
             purchaseDate: purchaseDate,
             installments: installments,
+            category: category,
           ));
 
   Future<void> payInvoice() async {

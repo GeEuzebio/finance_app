@@ -13,5 +13,6 @@ class AppSettings with _$AppSettings {
     // Minutos desde meia-noite — evita lidar com serialização de
     // TimeOfDay; 1200 = 20:00.
     @Default(1200) int checkInReminderMinutes,
+    @Default(false) bool aiInsightsEnabled,
   }) = _AppSettings;
 }

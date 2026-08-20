@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/utils/date_only.dart';
+import '../../../../core/utils/transaction_category.dart';
 
 part 'transaction.freezed.dart';
 
@@ -23,6 +24,8 @@ class Transaction with _$Transaction {
     // (M7, #023) — usado pra deduplicar reimportação do mesmo período.
     // `null` em todo o resto do app.
     String? externalId,
+    // Pra onde foi o gasto, não como foi pago (M7, #029).
+    @Default(TransactionCategory.outros) TransactionCategory category,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _Transaction;

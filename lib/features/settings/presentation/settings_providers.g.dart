@@ -25,7 +25,7 @@ final sharedPreferencesProvider =
 // ignore: unused_element
 typedef SharedPreferencesRef = AutoDisposeFutureProviderRef<SharedPreferences>;
 String _$settingsControllerHash() =>
-    r'4f8637925ef1ef87e8d68dcabb0a333ec5659c05';
+    r'8fd15ecb896c80e30ec164f827189caafef10837';
 
 /// See also [SettingsController].
 @ProviderFor(SettingsController)

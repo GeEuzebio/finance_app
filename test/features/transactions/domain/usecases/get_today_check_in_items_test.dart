@@ -1,4 +1,5 @@
 import 'package:finance_app/core/utils/date_only.dart';
+import 'package:finance_app/core/utils/transaction_category.dart';
 import 'package:finance_app/features/accounts/domain/entities/account.dart';
 import 'package:finance_app/features/accounts/domain/repositories/account_repository.dart';
 import 'package:finance_app/features/transactions/domain/entities/recurrence_rule.dart';
@@ -104,6 +105,7 @@ void main() {
       frequency: RecurrenceFrequency.monthly,
       interval: 1,
       startDate: today,
+      category: TransactionCategory.moradia,
       createdAt: DateTime(2026),
     );
     when(() => transactions.getAll()).thenAnswer((_) async => const Right([]));
@@ -116,6 +118,7 @@ void main() {
       expect(items.single.isVirtual, isTrue);
       expect(items.single.recurrenceRuleId, 'r1');
       expect(items.single.transactionId, isNull);
+      expect(items.single.category, TransactionCategory.moradia);
     });
   });
 

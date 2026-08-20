@@ -29,7 +29,9 @@ mixin _$Transaction {
       throw _privateConstructorUsedError; // Preenchido só em lançamentos vindos de importação OFX/CSV
 // (M7, #023) — usado pra deduplicar reimportação do mesmo período.
 // `null` em todo o resto do app.
-  String? get externalId => throw _privateConstructorUsedError;
+  String? get externalId =>
+      throw _privateConstructorUsedError; // Pra onde foi o gasto, não como foi pago (M7, #029).
+  TransactionCategory get category => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
@@ -58,6 +60,7 @@ abstract class $TransactionCopyWith<$Res> {
       String? transferGroupId,
       String? invoicePaymentForId,
       String? externalId,
+      TransactionCategory category,
       DateTime createdAt,
       DateTime updatedAt});
 }
@@ -88,6 +91,7 @@ class _$TransactionCopyWithImpl<$Res, $Val extends Transaction>
     Object? transferGroupId = freezed,
     Object? invoicePaymentForId = freezed,
     Object? externalId = freezed,
+    Object? category = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -136,6 +140,10 @@ class _$TransactionCopyWithImpl<$Res, $Val extends Transaction>
           ? _value.externalId
           : externalId // ignore: cast_nullable_to_non_nullable
               as String?,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as TransactionCategory,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -168,6 +176,7 @@ abstract class _$$TransactionImplCopyWith<$Res>
       String? transferGroupId,
       String? invoicePaymentForId,
       String? externalId,
+      TransactionCategory category,
       DateTime createdAt,
       DateTime updatedAt});
 }
@@ -196,6 +205,7 @@ class __$$TransactionImplCopyWithImpl<$Res>
     Object? transferGroupId = freezed,
     Object? invoicePaymentForId = freezed,
     Object? externalId = freezed,
+    Object? category = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -244,6 +254,10 @@ class __$$TransactionImplCopyWithImpl<$Res>
           ? _value.externalId
           : externalId // ignore: cast_nullable_to_non_nullable
               as String?,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as TransactionCategory,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -271,6 +285,7 @@ class _$TransactionImpl implements _Transaction {
       this.transferGroupId,
       this.invoicePaymentForId,
       this.externalId,
+      this.category = TransactionCategory.outros,
       required this.createdAt,
       required this.updatedAt});
 
@@ -299,6 +314,10 @@ class _$TransactionImpl implements _Transaction {
 // `null` em todo o resto do app.
   @override
   final String? externalId;
+// Pra onde foi o gasto, não como foi pago (M7, #029).
+  @override
+  @JsonKey()
+  final TransactionCategory category;
   @override
   final DateTime createdAt;
   @override
@@ -306,7 +325,7 @@ class _$TransactionImpl implements _Transaction {
 
   @override
   String toString() {
-    return 'Transaction(id: $id, accountId: $accountId, description: $description, amountCents: $amountCents, date: $date, status: $status, recurrenceRuleId: $recurrenceRuleId, originalTransactionId: $originalTransactionId, transferGroupId: $transferGroupId, invoicePaymentForId: $invoicePaymentForId, externalId: $externalId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Transaction(id: $id, accountId: $accountId, description: $description, amountCents: $amountCents, date: $date, status: $status, recurrenceRuleId: $recurrenceRuleId, originalTransactionId: $originalTransactionId, transferGroupId: $transferGroupId, invoicePaymentForId: $invoicePaymentForId, externalId: $externalId, category: $category, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -333,6 +352,8 @@ class _$TransactionImpl implements _Transaction {
                 other.invoicePaymentForId == invoicePaymentForId) &&
             (identical(other.externalId, externalId) ||
                 other.externalId == externalId) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -353,6 +374,7 @@ class _$TransactionImpl implements _Transaction {
       transferGroupId,
       invoicePaymentForId,
       externalId,
+      category,
       createdAt,
       updatedAt);
 
@@ -378,6 +400,7 @@ abstract class _Transaction implements Transaction {
       final String? transferGroupId,
       final String? invoicePaymentForId,
       final String? externalId,
+      final TransactionCategory category,
       required final DateTime createdAt,
       required final DateTime updatedAt}) = _$TransactionImpl;
 
@@ -405,7 +428,9 @@ abstract class _Transaction implements Transaction {
 // (M7, #023) — usado pra deduplicar reimportação do mesmo período.
 // `null` em todo o resto do app.
   @override
-  String? get externalId;
+  String? get externalId; // Pra onde foi o gasto, não como foi pago (M7, #029).
+  @override
+  TransactionCategory get category;
   @override
   DateTime get createdAt;
   @override

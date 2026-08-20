@@ -22,6 +22,7 @@ mixin _$CheckInItem {
   String get description => throw _privateConstructorUsedError;
   int get amountCents => throw _privateConstructorUsedError;
   DateOnly get date => throw _privateConstructorUsedError;
+  TransactionCategory get category => throw _privateConstructorUsedError;
   String? get recurrenceRuleId =>
       throw _privateConstructorUsedError; // null pra item ainda virtual — materializar usa DateTime.now() nesse
 // caso; preservado ao reeditar um item já materializado, pra não
@@ -48,6 +49,7 @@ abstract class $CheckInItemCopyWith<$Res> {
       String description,
       int amountCents,
       DateOnly date,
+      TransactionCategory category,
       String? recurrenceRuleId,
       DateTime? createdAt});
 }
@@ -73,6 +75,7 @@ class _$CheckInItemCopyWithImpl<$Res, $Val extends CheckInItem>
     Object? description = null,
     Object? amountCents = null,
     Object? date = null,
+    Object? category = null,
     Object? recurrenceRuleId = freezed,
     Object? createdAt = freezed,
   }) {
@@ -101,6 +104,10 @@ class _$CheckInItemCopyWithImpl<$Res, $Val extends CheckInItem>
           ? _value.date
           : date // ignore: cast_nullable_to_non_nullable
               as DateOnly,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as TransactionCategory,
       recurrenceRuleId: freezed == recurrenceRuleId
           ? _value.recurrenceRuleId
           : recurrenceRuleId // ignore: cast_nullable_to_non_nullable
@@ -128,6 +135,7 @@ abstract class _$$CheckInItemImplCopyWith<$Res>
       String description,
       int amountCents,
       DateOnly date,
+      TransactionCategory category,
       String? recurrenceRuleId,
       DateTime? createdAt});
 }
@@ -151,6 +159,7 @@ class __$$CheckInItemImplCopyWithImpl<$Res>
     Object? description = null,
     Object? amountCents = null,
     Object? date = null,
+    Object? category = null,
     Object? recurrenceRuleId = freezed,
     Object? createdAt = freezed,
   }) {
@@ -179,6 +188,10 @@ class __$$CheckInItemImplCopyWithImpl<$Res>
           ? _value.date
           : date // ignore: cast_nullable_to_non_nullable
               as DateOnly,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as TransactionCategory,
       recurrenceRuleId: freezed == recurrenceRuleId
           ? _value.recurrenceRuleId
           : recurrenceRuleId // ignore: cast_nullable_to_non_nullable
@@ -201,6 +214,7 @@ class _$CheckInItemImpl extends _CheckInItem {
       required this.description,
       required this.amountCents,
       required this.date,
+      this.category = TransactionCategory.outros,
       this.recurrenceRuleId,
       this.createdAt})
       : super._();
@@ -218,6 +232,9 @@ class _$CheckInItemImpl extends _CheckInItem {
   @override
   final DateOnly date;
   @override
+  @JsonKey()
+  final TransactionCategory category;
+  @override
   final String? recurrenceRuleId;
 // null pra item ainda virtual — materializar usa DateTime.now() nesse
 // caso; preservado ao reeditar um item já materializado, pra não
@@ -227,7 +244,7 @@ class _$CheckInItemImpl extends _CheckInItem {
 
   @override
   String toString() {
-    return 'CheckInItem(transactionId: $transactionId, accountId: $accountId, accountName: $accountName, description: $description, amountCents: $amountCents, date: $date, recurrenceRuleId: $recurrenceRuleId, createdAt: $createdAt)';
+    return 'CheckInItem(transactionId: $transactionId, accountId: $accountId, accountName: $accountName, description: $description, amountCents: $amountCents, date: $date, category: $category, recurrenceRuleId: $recurrenceRuleId, createdAt: $createdAt)';
   }
 
   @override
@@ -246,6 +263,8 @@ class _$CheckInItemImpl extends _CheckInItem {
             (identical(other.amountCents, amountCents) ||
                 other.amountCents == amountCents) &&
             (identical(other.date, date) || other.date == date) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
             (identical(other.recurrenceRuleId, recurrenceRuleId) ||
                 other.recurrenceRuleId == recurrenceRuleId) &&
             (identical(other.createdAt, createdAt) ||
@@ -253,8 +272,17 @@ class _$CheckInItemImpl extends _CheckInItem {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, transactionId, accountId,
-      accountName, description, amountCents, date, recurrenceRuleId, createdAt);
+  int get hashCode => Object.hash(
+      runtimeType,
+      transactionId,
+      accountId,
+      accountName,
+      description,
+      amountCents,
+      date,
+      category,
+      recurrenceRuleId,
+      createdAt);
 
   /// Create a copy of CheckInItem
   /// with the given fields replaced by the non-null parameter values.
@@ -273,6 +301,7 @@ abstract class _CheckInItem extends CheckInItem {
       required final String description,
       required final int amountCents,
       required final DateOnly date,
+      final TransactionCategory category,
       final String? recurrenceRuleId,
       final DateTime? createdAt}) = _$CheckInItemImpl;
   const _CheckInItem._() : super._();
@@ -289,6 +318,8 @@ abstract class _CheckInItem extends CheckInItem {
   int get amountCents;
   @override
   DateOnly get date;
+  @override
+  TransactionCategory get category;
   @override
   String?
       get recurrenceRuleId; // null pra item ainda virtual — materializar usa DateTime.now() nesse

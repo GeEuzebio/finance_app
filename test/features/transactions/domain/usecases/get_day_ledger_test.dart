@@ -1,4 +1,5 @@
 import 'package:finance_app/core/utils/date_only.dart';
+import 'package:finance_app/core/utils/transaction_category.dart';
 import 'package:finance_app/features/accounts/domain/entities/account.dart';
 import 'package:finance_app/features/accounts/domain/repositories/account_repository.dart';
 import 'package:finance_app/features/credit_cards/domain/entities/credit_card.dart';
@@ -62,6 +63,7 @@ void main() {
       amountCents: -5000,
       date: day,
       status: TransactionStatus.confirmado,
+      category: TransactionCategory.alimentacao,
       createdAt: DateTime(2026),
       updatedAt: DateTime(2026),
     );
@@ -72,6 +74,7 @@ void main() {
     result.match((l) => fail('esperava Right, recebeu $l'), (items) {
       expect(items.length, 1);
       expect(items.single.transactionId, 't1');
+      expect(items.single.category, TransactionCategory.alimentacao);
     });
   });
 

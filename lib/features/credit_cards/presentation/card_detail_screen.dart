@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_only.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/utils/transaction_category.dart';
 import '../../../core/widgets/state_views.dart';
 import '../domain/entities/invoice.dart';
 import '../domain/entities/invoice_item.dart';
@@ -43,6 +44,7 @@ class CardDetailScreen extends ConsumerWidget {
     final amountController = TextEditingController();
     final installmentsController = TextEditingController(text: '1');
     var purchaseDate = DateOnly.fromDateTime(DateTime.now());
+    var category = TransactionCategory.outros;
 
     await showDialog<void>(
       context: context,
@@ -106,6 +108,15 @@ class CardDetailScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<TransactionCategory>(
+                  initialValue: category,
+                  decoration: const InputDecoration(labelText: 'Categoria'),
+                  items: TransactionCategory.values
+                      .map((c) => DropdownMenuItem(value: c, child: Text(categoryLabel(c))))
+                      .toList(),
+                  onChanged: (value) => setState(() => category = value ?? category),
+                ),
               ],
             ),
           ),
@@ -127,6 +138,7 @@ class CardDetailScreen extends ConsumerWidget {
                       amountCents: cents,
                       purchaseDate: purchaseDate,
                       installments: int.parse(installmentsController.text),
+                      category: category,
                     );
                 if (dialogContext.mounted) Navigator.of(dialogContext).pop();
               },
@@ -297,14 +309,21 @@ class _InvoiceItemTile extends ConsumerWidget {
                     style: theme.textTheme.bodyLarge,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (item.installmentTotal > 1) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Parcela ${item.installmentNumber}/${item.installmentTotal}',
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: AppColors.textMuted(theme.brightness)),
-                    ),
-                  ],
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(categoryIcon(item.category),
+                          size: 14, color: AppColors.textMuted(theme.brightness)),
+                      const SizedBox(width: 4),
+                      Text(
+                        item.installmentTotal > 1
+                            ? '${categoryLabel(item.category)} · Parcela ${item.installmentNumber}/${item.installmentTotal}'
+                            : categoryLabel(item.category),
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: AppColors.textMuted(theme.brightness)),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

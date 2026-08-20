@@ -38,6 +38,7 @@ class GetTodayCheckInItems {
                 description: t.description,
                 amountCents: t.amountCents,
                 date: t.date,
+                category: t.category,
                 recurrenceRuleId: t.recurrenceRuleId,
                 createdAt: t.createdAt,
               ));
@@ -61,6 +62,7 @@ class GetTodayCheckInItems {
                 description: r.description,
                 amountCents: r.amountCents,
                 date: today,
+                category: r.category,
                 recurrenceRuleId: r.id,
               ));
 

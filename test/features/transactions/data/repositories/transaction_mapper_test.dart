@@ -1,4 +1,5 @@
 import 'package:finance_app/core/utils/date_only.dart';
+import 'package:finance_app/core/utils/transaction_category.dart';
 import 'package:finance_app/features/transactions/data/repositories/transaction_repository_impl.dart';
 import 'package:finance_app/features/transactions/domain/entities/transaction.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +13,7 @@ void main() {
       amountCents: -1000,
       date: DateOnly(2026, 8, 1),
       status: TransactionStatus.previsto,
+      category: TransactionCategory.alimentacao,
       createdAt: DateTime.utc(2026, 8, 1),
       updatedAt: DateTime.utc(2026, 8, 1),
     );
@@ -19,6 +21,7 @@ void main() {
     final json = transactionToJson(transaction);
     expect(json['recurrence_rule_id'], isNull);
     expect(json['status'], 'previsto');
+    expect(json['category'], 'alimentacao');
 
     expect(transactionFromJson(json), transaction);
   });

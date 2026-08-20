@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/guard_database.dart';
 import '../../../../core/utils/date_only.dart';
+import '../../../../core/utils/transaction_category.dart';
 import '../../domain/entities/credit_card.dart';
 import '../../domain/entities/invoice.dart';
 import '../../domain/entities/invoice_item.dart';
@@ -170,6 +171,7 @@ InvoiceItem invoiceItemFromJson(Map<String, dynamic> row) => InvoiceItem(
       installmentTotal: row['installment_total'] as int,
       purchaseGroupId: row['purchase_group_id'] as String,
       externalId: row['external_id'] as String?,
+      category: TransactionCategory.values.byName(row['category'] as String),
       createdAt: DateTime.parse(row['created_at'] as String),
     );
 
@@ -183,5 +185,6 @@ Map<String, dynamic> invoiceItemToJson(InvoiceItem item) => {
       'installment_total': item.installmentTotal,
       'purchase_group_id': item.purchaseGroupId,
       'external_id': item.externalId,
+      'category': item.category.name,
       'created_at': item.createdAt.toIso8601String(),
     };

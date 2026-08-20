@@ -27,7 +27,11 @@ mixin _$InvoiceItem {
       throw _privateConstructorUsedError; // Preenchido só em itens vindos de importação de fatura OFX/CSV
 // (M7, #025) — usado pra deduplicar reimportação do mesmo período.
 // `null` em todo o resto do app.
-  String? get externalId => throw _privateConstructorUsedError;
+  String? get externalId =>
+      throw _privateConstructorUsedError; // Pra onde foi o gasto, não como foi pago (M7, #029). Itens de
+// importação (OFX/CSV) ficam em 'outros' — não dá pra inferir
+// categoria de um extrato de fatura automaticamente.
+  TransactionCategory get category => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
   /// Create a copy of InvoiceItem
@@ -53,6 +57,7 @@ abstract class $InvoiceItemCopyWith<$Res> {
       int installmentTotal,
       String purchaseGroupId,
       String? externalId,
+      TransactionCategory category,
       DateTime createdAt});
 }
 
@@ -80,6 +85,7 @@ class _$InvoiceItemCopyWithImpl<$Res, $Val extends InvoiceItem>
     Object? installmentTotal = null,
     Object? purchaseGroupId = null,
     Object? externalId = freezed,
+    Object? category = null,
     Object? createdAt = null,
   }) {
     return _then(_value.copyWith(
@@ -119,6 +125,10 @@ class _$InvoiceItemCopyWithImpl<$Res, $Val extends InvoiceItem>
           ? _value.externalId
           : externalId // ignore: cast_nullable_to_non_nullable
               as String?,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as TransactionCategory,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -145,6 +155,7 @@ abstract class _$$InvoiceItemImplCopyWith<$Res>
       int installmentTotal,
       String purchaseGroupId,
       String? externalId,
+      TransactionCategory category,
       DateTime createdAt});
 }
 
@@ -170,6 +181,7 @@ class __$$InvoiceItemImplCopyWithImpl<$Res>
     Object? installmentTotal = null,
     Object? purchaseGroupId = null,
     Object? externalId = freezed,
+    Object? category = null,
     Object? createdAt = null,
   }) {
     return _then(_$InvoiceItemImpl(
@@ -209,6 +221,10 @@ class __$$InvoiceItemImplCopyWithImpl<$Res>
           ? _value.externalId
           : externalId // ignore: cast_nullable_to_non_nullable
               as String?,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as TransactionCategory,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -230,6 +246,7 @@ class _$InvoiceItemImpl implements _InvoiceItem {
       required this.installmentTotal,
       required this.purchaseGroupId,
       this.externalId,
+      this.category = TransactionCategory.outros,
       required this.createdAt});
 
   @override
@@ -253,12 +270,18 @@ class _$InvoiceItemImpl implements _InvoiceItem {
 // `null` em todo o resto do app.
   @override
   final String? externalId;
+// Pra onde foi o gasto, não como foi pago (M7, #029). Itens de
+// importação (OFX/CSV) ficam em 'outros' — não dá pra inferir
+// categoria de um extrato de fatura automaticamente.
+  @override
+  @JsonKey()
+  final TransactionCategory category;
   @override
   final DateTime createdAt;
 
   @override
   String toString() {
-    return 'InvoiceItem(id: $id, invoiceId: $invoiceId, description: $description, amountCents: $amountCents, purchaseDate: $purchaseDate, installmentNumber: $installmentNumber, installmentTotal: $installmentTotal, purchaseGroupId: $purchaseGroupId, externalId: $externalId, createdAt: $createdAt)';
+    return 'InvoiceItem(id: $id, invoiceId: $invoiceId, description: $description, amountCents: $amountCents, purchaseDate: $purchaseDate, installmentNumber: $installmentNumber, installmentTotal: $installmentTotal, purchaseGroupId: $purchaseGroupId, externalId: $externalId, category: $category, createdAt: $createdAt)';
   }
 
   @override
@@ -283,6 +306,8 @@ class _$InvoiceItemImpl implements _InvoiceItem {
                 other.purchaseGroupId == purchaseGroupId) &&
             (identical(other.externalId, externalId) ||
                 other.externalId == externalId) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -299,6 +324,7 @@ class _$InvoiceItemImpl implements _InvoiceItem {
       installmentTotal,
       purchaseGroupId,
       externalId,
+      category,
       createdAt);
 
   /// Create a copy of InvoiceItem
@@ -321,6 +347,7 @@ abstract class _InvoiceItem implements InvoiceItem {
       required final int installmentTotal,
       required final String purchaseGroupId,
       final String? externalId,
+      final TransactionCategory category,
       required final DateTime createdAt}) = _$InvoiceItemImpl;
 
   @override
@@ -343,7 +370,12 @@ abstract class _InvoiceItem implements InvoiceItem {
 // (M7, #025) — usado pra deduplicar reimportação do mesmo período.
 // `null` em todo o resto do app.
   @override
-  String? get externalId;
+  String?
+      get externalId; // Pra onde foi o gasto, não como foi pago (M7, #029). Itens de
+// importação (OFX/CSV) ficam em 'outros' — não dá pra inferir
+// categoria de um extrato de fatura automaticamente.
+  @override
+  TransactionCategory get category;
   @override
   DateTime get createdAt;
 

@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_only.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/utils/transaction_category.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../accounts/domain/entities/account.dart';
 import '../../accounts/presentation/accounts_providers.dart';
@@ -81,6 +82,7 @@ class LancamentosScreen extends ConsumerWidget {
     var tipo = _Tipo.avulso;
     final accountId = accounts.first.id;
     var isEntrada = false;
+    var category = TransactionCategory.outros;
     var date = DateOnly.fromDateTime(DateTime.now());
     var endDate = DateOnly.fromDateTime(DateTime.now());
     var hasEndDate = false;
@@ -141,6 +143,15 @@ class LancamentosScreen extends ConsumerWidget {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<TransactionCategory>(
+                    initialValue: category,
+                    decoration: const InputDecoration(labelText: 'Categoria'),
+                    items: TransactionCategory.values
+                        .map((c) => DropdownMenuItem(value: c, child: Text(categoryLabel(c))))
+                        .toList(),
+                    onChanged: (value) => setState(() => category = value ?? category),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -258,6 +269,7 @@ class LancamentosScreen extends ConsumerWidget {
                             amountCents: cents,
                             date: date,
                             status: TransactionStatus.previsto,
+                            category: category,
                             createdAt: now,
                             updatedAt: now,
                           ),
@@ -276,6 +288,7 @@ class LancamentosScreen extends ConsumerWidget {
                             startDate: date,
                             endDate: hasEndDate ? endDate : null,
                             isVariable: tipo == _Tipo.variavel,
+                            category: category,
                             createdAt: DateTime.now(),
                           ),
                         );
@@ -354,10 +367,17 @@ class _TransactionCard extends StatelessWidget {
                 children: [
                   Text(transaction.description, style: theme.textTheme.bodyLarge),
                   const SizedBox(height: 4),
-                  Text(
-                    _formatDate(transaction.date),
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: AppColors.textMuted(theme.brightness)),
+                  Row(
+                    children: [
+                      Icon(categoryIcon(transaction.category),
+                          size: 14, color: AppColors.textMuted(theme.brightness)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${categoryLabel(transaction.category)} · ${_formatDate(transaction.date)}',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: AppColors.textMuted(theme.brightness)),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -396,10 +416,17 @@ class _RecurrenceCard extends StatelessWidget {
                 children: [
                   Text(rule.description, style: theme.textTheme.bodyLarge),
                   const SizedBox(height: 4),
-                  Text(
-                    _frequencyLabel(rule.frequency),
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: AppColors.textMuted(theme.brightness)),
+                  Row(
+                    children: [
+                      Icon(categoryIcon(rule.category),
+                          size: 14, color: AppColors.textMuted(theme.brightness)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${categoryLabel(rule.category)} · ${_frequencyLabel(rule.frequency)}',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: AppColors.textMuted(theme.brightness)),
+                      ),
+                    ],
                   ),
                 ],
               ),

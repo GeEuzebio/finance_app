@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_only.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/utils/transaction_category.dart';
 import '../../../core/widgets/state_views.dart';
 import '../domain/entities/check_in_item.dart';
 import 'check_in_providers.dart';
@@ -67,6 +68,19 @@ class _CheckInCard extends ConsumerWidget {
                       Text(
                         item.description,
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(categoryIcon(item.category),
+                              size: 14, color: AppColors.textMuted(theme.brightness)),
+                          const SizedBox(width: 4),
+                          Text(
+                            categoryLabel(item.category),
+                            style: theme.textTheme.bodySmall
+                                ?.copyWith(color: AppColors.textMuted(theme.brightness)),
+                          ),
+                        ],
                       ),
                     ],
                   ),

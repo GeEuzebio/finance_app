@@ -1,4 +1,5 @@
 import 'package:finance_app/core/utils/date_only.dart';
+import 'package:finance_app/core/utils/transaction_category.dart';
 import 'package:finance_app/features/cashflow_engine/domain/monthly_summary.dart';
 import 'package:finance_app/features/credit_cards/domain/entities/invoice_item.dart';
 import 'package:finance_app/features/transactions/domain/entities/recurrence_rule.dart';
@@ -12,6 +13,7 @@ void main() {
     TransactionStatus status = TransactionStatus.previsto,
     String? invoicePaymentForId,
     String? recurrenceRuleId,
+    TransactionCategory category = TransactionCategory.outros,
   }) =>
       Transaction(
         id: 't-${date.toString()}-$amountCents',
@@ -22,11 +24,16 @@ void main() {
         status: status,
         invoicePaymentForId: invoicePaymentForId,
         recurrenceRuleId: recurrenceRuleId,
+        category: category,
         createdAt: DateTime(2026),
         updatedAt: DateTime(2026),
       );
 
-  InvoiceItem buildInvoiceItem({required int amountCents, required DateOnly purchaseDate}) =>
+  InvoiceItem buildInvoiceItem({
+    required int amountCents,
+    required DateOnly purchaseDate,
+    TransactionCategory category = TransactionCategory.outros,
+  }) =>
       InvoiceItem(
         id: 'i-${purchaseDate.toString()}-$amountCents',
         invoiceId: 'inv1',
@@ -36,6 +43,7 @@ void main() {
         installmentNumber: 1,
         installmentTotal: 1,
         purchaseGroupId: 'g1',
+        category: category,
         createdAt: DateTime(2026),
       );
 
@@ -142,5 +150,102 @@ void main() {
     expect(result.savedCents, 30000);
     expect(result.savingsPercent, 30.0);
     expect(result.isSavingsOnTarget, isTrue);
+  });
+
+  test('categoryCents agrupa saídas de conta e gasto de cartão, soma bate com costOfLivingCents',
+      () {
+    final rule = RecurrenceRule(
+      id: 'r1',
+      accountId: 'a1',
+      description: 'aluguel',
+      amountCents: -200000,
+      frequency: RecurrenceFrequency.monthly,
+      interval: 1,
+      startDate: DateOnly(2026, 8, 5),
+      category: TransactionCategory.moradia,
+      createdAt: DateTime(2026),
+    );
+
+    final result = summarizeMonth(
+      transactions: [
+        buildTransaction(
+          amountCents: -5000,
+          date: DateOnly(2026, 8, 10),
+          category: TransactionCategory.alimentacao,
+        ),
+        buildTransaction(
+          amountCents: -3000,
+          date: DateOnly(2026, 8, 11),
+          category: TransactionCategory.alimentacao,
+        ),
+        // pagamento de fatura não deve entrar em categoryCents (mesmo
+        // filtro de expensesCents).
+        buildTransaction(
+          amountCents: -1500,
+          date: DateOnly(2026, 8, 20),
+          status: TransactionStatus.confirmado,
+          invoicePaymentForId: 'inv1',
+          category: TransactionCategory.lazer,
+        ),
+      ],
+      recurrenceRules: [rule],
+      invoiceItems: [
+        buildInvoiceItem(
+          amountCents: -1500,
+          purchaseDate: DateOnly(2026, 8, 8),
+          category: TransactionCategory.lazer,
+        ),
+      ],
+      year: 2026,
+      month: 8,
+      savingsTargetPercent: 20,
+      today: DateOnly(2026, 9, 1),
+    );
+
+    expect(result.categoryCents[TransactionCategory.alimentacao], 8000);
+    expect(result.categoryCents[TransactionCategory.moradia], 200000);
+    expect(result.categoryCents[TransactionCategory.lazer], 1500);
+    expect(result.categoryCents.containsKey(TransactionCategory.transporte), isFalse);
+    expect(
+      result.categoryCents.values.fold<int>(0, (sum, v) => sum + v),
+      result.costOfLivingCents,
+    );
+  });
+
+  test('budget503020 separa necessidade/desejo por categoria e reusa a reserva do resumo', () {
+    final summary = summarizeMonth(
+      transactions: [
+        buildTransaction(
+          amountCents: 1000000,
+          date: DateOnly(2026, 8, 1),
+          status: TransactionStatus.confirmado,
+        ),
+        buildTransaction(
+          amountCents: -400000,
+          date: DateOnly(2026, 8, 5),
+          category: TransactionCategory.moradia,
+        ),
+        buildTransaction(
+          amountCents: -100000,
+          date: DateOnly(2026, 8, 6),
+          category: TransactionCategory.lazer,
+        ),
+      ],
+      recurrenceRules: const [],
+      invoiceItems: const [],
+      year: 2026,
+      month: 8,
+      savingsTargetPercent: 20,
+      today: DateOnly(2026, 9, 1),
+    );
+
+    final budget = budget503020(summary);
+
+    expect(budget.necessidadesCents, 400000);
+    expect(budget.desejosCents, 100000);
+    expect(budget.reservaCents, summary.savedCents);
+    expect(budget.reservaPercent, summary.savingsPercent);
+    expect(budget.necessidadesPercent, 40.0);
+    expect(budget.desejosPercent, 10.0);
   });
 }

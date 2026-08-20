@@ -18,6 +18,7 @@ Transaction materializeCheckInItem(
     amountCents: amountCents ?? item.amountCents,
     date: item.date,
     status: status,
+    category: item.category,
     recurrenceRuleId: item.recurrenceRuleId,
     createdAt: item.createdAt ?? now,
     updatedAt: now,
